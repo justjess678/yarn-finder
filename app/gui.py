@@ -30,6 +30,7 @@ def scrape_yarn_data():
 # Function to index yarns (process images and show results)
 def index_yarns():
     # Log the result
+    global results
     log_message(f"Comparing yarn colors, please wait...")
     results = col_selector.compare_all_yarn_images()
     log_message(f"Done comparing yarn colors!")
@@ -150,7 +151,7 @@ def log_message(message):
 # Setting up the main window
 root = tk.Tk()
 root.title("Yarn Indexer")
-root.geometry("400x800")
+root.geometry("400x1000")
 
 # Section for reference image input
 reference_frame = tk.Frame(root)
