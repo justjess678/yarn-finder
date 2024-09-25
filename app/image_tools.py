@@ -4,8 +4,10 @@ import shutil
 import urllib
 
 import requests
+from numpy.f2py.f90mod_rules import options
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 
 # Set the path to the Chromedriver
 DRIVER_PATH = '../lib/chromedriver-linux64/chromedriver'
@@ -17,7 +19,8 @@ if not os.path.isdir('../reference'):
     os.mkdir('../reference')
 
 def clear_data():
-    os.remove('yarn_data.json')
+    if os.path.isfile('yarn_data.json'):
+        os.remove('yarn_data.json')
     folder = '../images'
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
@@ -80,7 +83,11 @@ class Scraper():
 
     def __init__(self):
         # Initialize the Chrome driver
-        self.driver = webdriver.Chrome()
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  # Enable headless mode
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        self.driver = webdriver.Chrome(options=chrome_options)
 
     def go_to_page(self, url:str):
         # Navigate to the URL
@@ -96,12 +103,13 @@ class IceYarnsScraper(Scraper):
     def __init__(self):
         super().__init__()
         self.yarn_links = []
-        self.page_numbers = 100 # debug 371
+        self.page_numbers = 1 # debug 371
         self.output = {}
 
     def get_yarn_pages(self):
         for i in range (1, self.page_numbers):
             self.driver.get(f"https://www.iceyarns.net/yarn/page/{i}")
+            print(f'Scanning page {i}/{self.page_numbers}')
             try:
                 ul_element = self.driver.find_element(By.ID, 'innerlist')
                 a_elements = ul_element.find_elements(By.XPATH, './/li//a')
@@ -128,6 +136,7 @@ class IceYarnsScraper(Scraper):
             text = name.text
 
             if not self.is_lot(text):
+                print(f'Getting photo for {text}')
                 item = {"name": text, "image_url": img_url}
                 self.output[url] = item
         except Exception as e:
@@ -138,11 +147,13 @@ class IceYarnsScraper(Scraper):
         return self.output
 
     def get_number_of_pages(self):
+        print(f'Getting pages...')
         self.driver.get("https://www.iceyarns.net/yarn/page/1")
         self.page_numbers = 1
-        while self.yarn_page_exists():
+        while self.yarn_page_exists() or self.page_numbers < 100:
             self.page_numbers = self.page_numbers + 1
             self.driver.get(f"https://www.iceyarns.net/yarn/page/{self.page_numbers}")
+        print(f'{self.page_numbers} pages')
 
 
     def yarn_page_exists(self):
@@ -162,4 +173,5 @@ class IceYarnsScraper(Scraper):
             return False
 
     def is_lot(self, name:str):
-        return "Lot" in name or "Shades" in name or "Mixed" in name or "Leftover" in name
+        return ("Lot" in name or "Shades" in name or "Mixed" in name or "Leftover" in name or "Needle" in name
+                or "Hook" in name)

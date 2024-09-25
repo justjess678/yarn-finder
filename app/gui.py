@@ -31,7 +31,8 @@ def index_yarns():
     log_message(f"Comparing yarn colors, please wait...")
     results = col_selector.compare_all_yarn_images()
     log_message(f"Done comparing yarn colors!")
-    show_results(results)
+    #show_results(results)
+    show_page(results)
 
 
 # Function to let user select and replace the reference image
@@ -83,11 +84,57 @@ def show_results(results):
         log_message(f"Displayed image {idx + 1}: {result['link']}")
 
 
+# Pagination variables
+page = 0
+items_per_page = 9
+
+# Function to show the images for the current page
+def show_page(results):
+    # Clear previous images
+    for widget in result_frame.winfo_children():
+        widget.destroy()
+
+    # Get the items for the current page
+    start_idx = page * items_per_page
+    end_idx = start_idx + items_per_page
+    current_page_results = results[start_idx:end_idx]
+
+    # Display the images in a 3x3 grid
+    for idx, result in enumerate(current_page_results):
+        response = requests.get(result["image_url"])
+        img_data = Image.open(BytesIO(response.content))
+        img_data = img_data.resize((100, 100))  # Resize image for display
+        img = ImageTk.PhotoImage(img_data)
+
+        img_label = tk.Label(result_frame, image=img, cursor="hand2")
+        img_label.image = img  # Keep a reference
+        img_label.grid(row=idx // 3, column=idx % 3, padx=10, pady=10)
+
+        # Bind a click event to open the link
+        img_label.bind("<Button-1>", lambda e, url=result["link"]: open_link(url))
+
+    # Update page number label
+    page_label.config(text=f"Page {page + 1} of {((len(results) - 1) // items_per_page) + 1}")
 
 # Function to open a link in the browser
 def open_link(url):
     import webbrowser
     webbrowser.open(url)
+
+# Function to move to the next page
+def next_page():
+    global page
+    if (page + 1) * items_per_page < len(results):
+        page += 1
+        show_page()
+
+# Function to move to the previous page
+def previous_page():
+    global page
+    if page > 0:
+        page -= 1
+        show_page()
+
 
 
 # Function to log messages
@@ -137,6 +184,23 @@ result_frame.pack(pady=20)
 
 # Load the reference image if it exists
 load_reference_image()
+
+# Create a frame to hold the results
+result_frame = tk.Frame(root)
+result_frame.pack(pady=10)
+
+# Create navigation buttons
+nav_frame = tk.Frame(root)
+nav_frame.pack()
+
+prev_button = tk.Button(nav_frame, text="Previous", command=previous_page)
+prev_button.grid(row=0, column=0, padx=5)
+
+page_label = tk.Label(nav_frame, text="Page 1 of 1")
+page_label.grid(row=0, column=1)
+
+next_button = tk.Button(nav_frame, text="Next", command=next_page)
+next_button.grid(row=0, column=2, padx=5)
 
 # Start the Tkinter event loop
 root.mainloop()
