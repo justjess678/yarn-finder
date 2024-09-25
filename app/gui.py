@@ -12,6 +12,8 @@ from color_selector import ColorSelector
 
 col_selector = ColorSelector()
 
+results = []
+
 
 # Function to clear cache (if you have any cached images)
 def clear_cache():
@@ -32,7 +34,7 @@ def index_yarns():
     results = col_selector.compare_all_yarn_images()
     log_message(f"Done comparing yarn colors!")
     #show_results(results)
-    show_page(results)
+    show_page()
 
 
 # Function to let user select and replace the reference image
@@ -56,7 +58,7 @@ def load_reference_image():
 
 
 # Function to show the top 9 results in a 3x3 grid
-def show_results(results):
+def show_results():
     # Clear any previous results
     for widget in result_frame.winfo_children():
         widget.destroy()
@@ -89,7 +91,7 @@ page = 0
 items_per_page = 9
 
 # Function to show the images for the current page
-def show_page(results):
+def show_page():
     # Clear previous images
     for widget in result_frame.winfo_children():
         widget.destroy()
