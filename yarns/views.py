@@ -88,9 +88,14 @@ def search(request):
 
     filters = request.session.get("filters", {})
     yarns = _apply_filters(Yarn.objects.exclude(color_r=None), filters)
+    source_names = {cls.source_id: cls.display_name for cls in SCRAPERS.values()}
     results = sorted(
         [
-            {"yarn": yarn, "score": color_difference(reference_color, yarn.dominant_color)}
+            {
+                "yarn": yarn,
+                "score": color_difference(reference_color, yarn.dominant_color),
+                "source_name": source_names.get(yarn.source, yarn.source),
+            }
             for yarn in yarns
         ],
         key=lambda x: x["score"],

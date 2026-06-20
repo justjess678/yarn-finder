@@ -32,8 +32,13 @@
             <a href="{{ item.yarn.url }}" target="_blank" class="text-decoration-none text-dark">
                 <img src="{{ item.yarn.image_url }}" class="card-img-top yarn-img" alt="{{ item.yarn.name }}">
                 <div class="card-body p-2">
-                    <p class="card-title small mb-1 fw-semibold">{{ item.yarn.name }}</p>
-                    <p class="card-text small text-muted">Score: {{ item.score|floatformat:1 }}</p>
+                    <p class="card-title small mb-1 fw-semibold lh-sm">{{ item.yarn.name }}</p>
+                    <p class="card-text mb-1" style="font-size:0.7rem; color: var(--yf-rose);">{{ item.source_name }}</p>
+                    {% if item.yarn.fiber or item.yarn.yarn_type %}
+                    <p class="card-text text-muted lh-sm" style="font-size:0.7rem;">
+                        {% if item.yarn.fiber %}{{ item.yarn.fiber }}{% endif %}{% if item.yarn.fiber and item.yarn.yarn_type %} &middot; {% endif %}{% if item.yarn.yarn_type %}{{ item.yarn.yarn_type }}{% endif %}
+                    </p>
+                    {% endif %}
                 </div>
             </a>
         </div>
