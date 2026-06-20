@@ -26,32 +26,6 @@ class LoveCraftsScraper(BaseScraper):
             except Exception:
                 pass
 
-    @staticmethod
-    def _make_driver():
-        options = Options()
-        options.add_argument("--headless=new")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--window-size=1920,1080")
-        options.add_argument(
-            "user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-            "(KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
-        )
-        options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        options.add_experimental_option("useAutomationExtension", False)
-        driver = webdriver.Chrome(options=options)
-        driver.execute_script(
-            "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
-        )
-        return driver
-
-    @staticmethod
-    def _accept_cookies(driver):
-        try:
-            driver.find_element(By.XPATH, "//button[contains(., 'Accept All')]").click()
-        except Exception:
-            pass
-
     def _get_page_count(self, driver) -> int:
         print("Getting page count...")
         driver.get(self.BASE_URL.format(1))
@@ -92,7 +66,7 @@ class LoveCraftsScraper(BaseScraper):
             print("Checking yarn link: {}".format(url))
             try:
                 driver.get(url)
-            except WebDriverException as e:
+            except Exception as e:
                 if "tab crashed" in str(e).lower():
                     print(f"Tab crashed on {url}, restarting driver and retrying...")
                     try:
@@ -101,7 +75,7 @@ class LoveCraftsScraper(BaseScraper):
                         pass
                     driver = self._make_driver()
                     continue  # retry same url
-                print(f"Detail error for {url}: {e}")
+                print(f"Skipping {url}: {e}")
                 idx += 1
                 continue
             try:
