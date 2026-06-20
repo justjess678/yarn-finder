@@ -58,7 +58,7 @@ class IceYarnsScraper(BaseScraper):
             print(f"  {name}")
             yield {
                 "name": name,
-                "url": f"https://www.iceyarns.com/products/{product['handle']}",
+                "url": f"https://www.iceyarns.com/products/{product['handle']}?variant={variant['id']}",
                 "image_url": image_url,
                 "fiber": fiber,
                 "yarn_type": product.get("product_type", ""),
