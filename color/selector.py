@@ -12,8 +12,10 @@ class ColorSelector:
         self.white_threshold = white_threshold
 
     def get_color_from_url(self, url: str):
-        response = requests.get(url, timeout=10)
-        return self.get_color_from_bytes(response.content)
+        with requests.get(url, timeout=10, stream=True) as response:
+            response.raw.decode_content = True
+            image = Image.open(response.raw).convert("RGB")
+            return self._dominant_non_white(image)
 
     def get_color_from_path(self, path: str):
         image = Image.open(path).convert("RGB")

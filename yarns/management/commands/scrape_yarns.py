@@ -1,9 +1,12 @@
-import requests
+import gc
+
 from django.core.management.base import BaseCommand
 
 from color.selector import ColorSelector
 from scrapers import SCRAPERS
 from yarns.models import Yarn
+
+GC_INTERVAL = 50
 
 
 class Command(BaseCommand):
@@ -26,7 +29,7 @@ class Command(BaseCommand):
             scraper = SCRAPERS[source_id]()
             yarn_data = scraper.scrape()
 
-            created = updated = 0
+            created = updated = count = 0
             existing_colors = {
                 yarn.url: (yarn.color_r, yarn.color_g, yarn.color_b)
                 for yarn in Yarn.objects.filter(source=source_id, color_r__isnull=False)
@@ -39,12 +42,11 @@ class Command(BaseCommand):
                 else:
                     color = None
                     try:
-                        response = requests.get(data["image_url"], timeout=10)
-                        color = selector.get_color_from_bytes(response.content)
+                        color = selector.get_color_from_url(data["image_url"])
                     except Exception as e:
                         self.stdout.write(f"  Color fetch failed for {data['name']}: {e}")
 
-                _, is_new = Yarn.objects.update_or_create(
+                Yarn.objects.update_or_create(
                     url=data["url"],
                     defaults={
                         "name": data["name"],
@@ -57,11 +59,8 @@ class Command(BaseCommand):
                         "yarn_type": data.get("yarn_type", ""),
                     },
                 )
-                if is_new:
-                    created += 1
-                else:
-                    updated += 1
+                count += 1
+                if count % GC_INTERVAL == 0:
+                    gc.collect()
 
-            self.stdout.write(
-                self.style.SUCCESS(f"  Done: {created} created, {updated} updated")
-            )
+            self.stdout.write(self.style.SUCCESS(f"  Done: {count} yarns processed"))
