@@ -1,4 +1,4 @@
-# Yarn Finder
+# Yarnpalette
 
 A Django web app that finds yarn colours matching a reference image or colour you pick.
 
