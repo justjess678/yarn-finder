@@ -6,11 +6,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-class LoveCraftsScraper(BaseScraper):
-    source_id    = "lovecrafts"
-    display_name = "LoveCrafts"
-    site_url     = "https://www.lovecrafts.com/"
-    BASE_URL     = "https://www.lovecrafts.com/en-gb/l/yarns?page={}"
+class SandnesScraper(BaseScraper):
+    source_id    = "sandnes"
+    display_name = "Sandnes"
+    site_url     = "https://www.sandnes.com/"
+    BASE_URL     = "https://www.sandnes.com/en-gb/l/yarns?page={}"
 
     def scrape(self):
         driver = self._make_driver()
