@@ -119,16 +119,20 @@ body {
 .marquee-track {
     display: flex;
     width: max-content;
-    animation: marquee-scroll 18s linear infinite;
 }
 
-.marquee-track:hover {
-    animation-play-state: paused;
+@media (prefers-reduced-motion: no-preference) {
+    .marquee-track {
+        animation: marquee-scroll 18s linear infinite;
+        will-change: transform;
+    }
+    .marquee-track:hover {
+        animation-play-state: paused;
+    }
 }
 
 @keyframes marquee-scroll {
-    from { transform: translateX(0); }
-    to   { transform: translateX(-50%); }
+    to { transform: translateX(-50%); }
 }
 
 .source-logo-item {
@@ -189,6 +193,20 @@ body {
 }
 .star-btn.starred {
     color: var(--yf-amber);
+}
+
+/* ── Google sign-in button ────────────────────────────── */
+.btn-google {
+    background: #fff;
+    border: 1px solid #dadce0;
+    color: #3c4043;
+    font-weight: 500;
+}
+.btn-google:hover {
+    background: #f8f9fa;
+    border-color: #c6c6c6;
+    color: #3c4043;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12);
 }
 
 /* ── Misc ─────────────────────────────────────────────── */
