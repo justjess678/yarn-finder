@@ -29,11 +29,14 @@ class BaseScraper(ABC):
         )
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option("useAutomationExtension", False)
+        from selenium.webdriver.chrome.service import Service
+        from selenium.webdriver.remote.remote_connection import RemoteConnection
+        RemoteConnection.set_timeout(360)
         driver = webdriver.Chrome(options=options)
         driver.execute_script(
             "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
         )
-        driver.set_page_load_timeout(90)
+        driver.set_page_load_timeout(300)
         return driver
 
     @staticmethod
