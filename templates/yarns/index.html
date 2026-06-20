@@ -59,7 +59,7 @@
             <details class="mb-3">
                 <summary class="text-muted small" style="cursor:pointer;">Filters <span class="text-secondary">(optional)</span></summary>
                 <div class="mt-3 d-flex flex-column gap-3">
-                    {% if sources|length > 1 %}
+                    {% if sources %}
                     <div>
                         <p class="form-label small mb-1">Brands</p>
                         {% for s in sources %}
@@ -70,8 +70,6 @@
                         </div>
                         {% endfor %}
                     </div>
-                    {% else %}
-                    {% for s in sources %}<input type="hidden" name="brands" value="{{ s.source_id }}">{% endfor %}
                     {% endif %}
                     <div>
                         <label for="fiber" class="form-label small">Fiber contains</label>
