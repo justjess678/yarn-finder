@@ -7,6 +7,8 @@ from .base import BaseScraper
 
 class IceYarnsScraper(BaseScraper):
     source_id = "ice_yarns"
+    display_name = "Ice Yarns"
+    site_url = "https://www.iceyarns.net"
     BASE_URL = "https://www.iceyarns.net/yarn/page/{}"
 
     def scrape(self) -> list[dict]:

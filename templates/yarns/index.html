@@ -69,6 +69,18 @@
     </div>
 </div>
 
+{% if sources %}
+<div class="source-gallery mt-5">
+    <p class="text-center text-muted small mb-2">Checking colours from</p>
+    <div class="marquee-outer">
+        <div class="marquee-track">
+            {% for s in sources %}{% include "yarns/_source_logo.html" %}{% endfor %}
+            {% for s in sources %}{% include "yarns/_source_logo.html" %}{% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <script>
     const picker  = document.getElementById('color_picker');
     const display = document.getElementById('color_hex_display');

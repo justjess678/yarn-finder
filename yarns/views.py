@@ -2,6 +2,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 
 from color.selector import ColorSelector, color_difference
+from scrapers import SCRAPERS
 from .models import Yarn
 
 ITEMS_PER_PAGE = 9
@@ -9,8 +10,10 @@ _selector = ColorSelector()
 
 
 def index(request):
+    sources = [cls for cls in SCRAPERS.values() if cls.display_name and cls.site_url]
     return render(request, "yarns/index.html", {
         "yarn_count": Yarn.objects.count(),
+        "sources": sources,
     })
 
 

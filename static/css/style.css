@@ -14,3 +14,63 @@
     border: 1px solid #dee2e6;
     flex-shrink: 0;
 }
+
+/* Rolling source gallery */
+.source-gallery {
+    overflow: hidden;
+    border-top: 1px solid #dee2e6;
+    padding-top: 1rem;
+}
+
+.marquee-outer {
+    overflow: hidden;
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee-scroll 18s linear infinite;
+}
+
+.marquee-track:hover {
+    animation-play-state: paused;
+}
+
+@keyframes marquee-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+
+.source-logo-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 0 2.5rem;
+    text-decoration: none;
+    color: #6c757d;
+    transition: color 0.15s;
+}
+
+.source-logo-item:hover {
+    color: #212529;
+}
+
+.source-logo-img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    filter: grayscale(40%);
+    transition: filter 0.15s;
+}
+
+.source-logo-item:hover .source-logo-img {
+    filter: none;
+}
+
+.source-logo-name {
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
