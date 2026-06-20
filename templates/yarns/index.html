@@ -11,20 +11,49 @@
         <div class="alert alert-warning">{{ error }}</div>
         {% endif %}
 
-        <form method="post" action="{% url 'search' %}" enctype="multipart/form-data">
+        <form method="post" action="{% url 'search' %}" enctype="multipart/form-data" id="search-form">
             {% csrf_token %}
-            <div class="mb-3">
-                <label for="reference_image" class="form-label">Upload a reference image</label>
-                <input
-                    class="form-control"
-                    type="file"
-                    id="reference_image"
-                    name="reference_image"
-                    accept="image/*"
-                    required
-                >
-                <div class="form-text">Upload any image — the app will extract its dominant color and find the closest yarns.</div>
+
+            <ul class="nav nav-tabs mb-3" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="tab-image-btn" data-bs-toggle="tab"
+                            data-bs-target="#tab-image" type="button" role="tab">
+                        Upload image
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-color-btn" data-bs-toggle="tab"
+                            data-bs-target="#tab-color" type="button" role="tab">
+                        Pick a color
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content mb-3">
+                <div class="tab-pane fade show active" id="tab-image" role="tabpanel">
+                    <input
+                        class="form-control"
+                        type="file"
+                        id="reference_image"
+                        name="reference_image"
+                        accept="image/*"
+                    >
+                    <div class="form-text">The dominant non-white color will be extracted and matched.</div>
+                </div>
+
+                <div class="tab-pane fade" id="tab-color" role="tabpanel">
+                    <div class="d-flex align-items-center gap-3">
+                        <input type="color" class="form-control form-control-color"
+                               id="color_picker" value="#3d7ab5" style="width:60px; height:42px;">
+                        <input type="text" class="form-control font-monospace"
+                               id="color_hex_display" value="#3d7ab5"
+                               maxlength="7" placeholder="#rrggbb" style="width:110px;">
+                        <input type="hidden" name="color_hex" id="color_hex" value="#3d7ab5">
+                    </div>
+                    <div class="form-text">Type a hex value or use the colour picker.</div>
+                </div>
             </div>
+
             <button type="submit" class="btn btn-dark">Find Matching Yarn</button>
         </form>
 
@@ -39,4 +68,35 @@
         </p>
     </div>
 </div>
+
+<script>
+    const picker  = document.getElementById('color_picker');
+    const display = document.getElementById('color_hex_display');
+    const hidden  = document.getElementById('color_hex');
+
+    function syncFromPicker() {
+        display.value = picker.value;
+        hidden.value  = picker.value;
+    }
+
+    function syncFromText() {
+        const val = display.value.trim();
+        if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+            picker.value = val;
+            hidden.value = val;
+        }
+    }
+
+    picker.addEventListener('input', syncFromPicker);
+    display.addEventListener('input', syncFromText);
+
+    // Clear the file input when switching to color tab, and vice versa,
+    // so the view knows which one to use.
+    document.getElementById('tab-color-btn').addEventListener('shown.bs.tab', () => {
+        document.getElementById('reference_image').value = '';
+    });
+    document.getElementById('tab-image-btn').addEventListener('shown.bs.tab', () => {
+        hidden.value = '';
+    });
+</script>
 {% endblock %}

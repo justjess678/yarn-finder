@@ -14,13 +14,28 @@ def index(request):
     })
 
 
+def _hex_to_rgb(hex_color: str) -> tuple | None:
+    hex_color = hex_color.lstrip("#")
+    if len(hex_color) != 6:
+        return None
+    try:
+        return (int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16))
+    except ValueError:
+        return None
+
+
 def search(request):
     if request.method == "POST":
         ref_file = request.FILES.get("reference_image")
-        if not ref_file:
+        color_hex = request.POST.get("color_hex", "").strip()
+
+        if ref_file:
+            reference_color = _selector.get_color_from_bytes(ref_file.read())
+        elif color_hex:
+            reference_color = _hex_to_rgb(color_hex)
+        else:
             return redirect("index")
 
-        reference_color = _selector.get_color_from_bytes(ref_file.read())
         if not reference_color:
             return render(request, "yarns/index.html", {
                 "error": "No dominant color found — the image may be entirely white.",
