@@ -16,10 +16,15 @@ class LoveCraftsScraper(BaseScraper):
         driver = self._make_driver()
         try:
             page_count = self._get_page_count(driver)
+            print("Found {} pages".format(page_count))
             links = self._get_yarn_links(driver, page_count)
+            print("Found {} yarn links".format(len(links)))
             return self._get_yarn_details(driver, links)
         finally:
-            driver.quit()
+            try:
+                driver.quit()
+            except Exception:
+                pass
 
     @staticmethod
     def _make_driver():
@@ -76,12 +81,30 @@ class LoveCraftsScraper(BaseScraper):
                         links.append(href)
             except Exception as e:
                 print(f"Page {i} error: {e}")
+        print(links)
         return links
 
     def _get_yarn_details(self, driver, links: list[str]) -> list[dict]:
+        from selenium.common.exceptions import WebDriverException
         results = []
-        for url in links:
-            driver.get(url)
+        idx = 0
+        while idx < len(links):
+            url = links[idx]
+            print("Checking yarn link: {}".format(url))
+            try:
+                driver.get(url)
+            except WebDriverException as e:
+                if "tab crashed" in str(e).lower():
+                    print(f"Tab crashed on {url}, restarting driver and retrying...")
+                    try:
+                        driver.quit()
+                    except Exception:
+                        pass
+                    driver = self._make_driver()
+                    continue  # retry same url
+                print(f"Detail error for {url}: {e}")
+                idx += 1
+                continue
             try:
                 WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.CLASS_NAME, "variant-name"))
@@ -89,6 +112,7 @@ class LoveCraftsScraper(BaseScraper):
                 base_name = driver.find_element(
                     By.XPATH, "//h1[contains(@class,'sf-heading__title')]"
                 ).text
+                print(base_name)
                 variants = driver.find_elements(By.CLASS_NAME, "grid-variants__variant")
                 seen_colours = set()
                 for variant in [None] + list(variants):
@@ -98,6 +122,7 @@ class LoveCraftsScraper(BaseScraper):
                         results.append(result)
             except Exception as e:
                 print(f"Detail error for {url}: {e}")
+            idx += 1
         return results
 
     @staticmethod
