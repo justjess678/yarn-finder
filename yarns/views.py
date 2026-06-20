@@ -137,3 +137,16 @@ def profile(request):
         .order_by("yarn__name")
     )
     return render(request, "yarns/profile.html", {"favourites": favourites})
+
+
+def privacy(request):
+    from django.conf import settings
+    return render(request, "yarns/privacy.html", {
+        "contact_email": getattr(settings, "CONTACT_EMAIL", "hello@yarnpalette.com"),
+    })
+
+
+def robots_txt(request):
+    from django.http import HttpResponse
+    content = "User-agent: *\nDisallow: /admin/\nDisallow: /accounts/\n"
+    return HttpResponse(content, content_type="text/plain")

@@ -105,6 +105,8 @@ STORAGES = {
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+CONTACT_EMAIL = os.getenv("CONTACT_EMAIL", "hello@yarnpalette.com")
+
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = [

@@ -30,6 +30,44 @@
     <div class="container">
         {% block content %}{% endblock %}
     </div>
+
+    <footer class="mt-5 py-4 border-top" style="border-color: var(--yf-beige) !important;">
+        <div class="container text-center" style="font-size:0.75rem; color: var(--yf-rose);">
+            <p class="mb-1">
+                Product images and data are © their respective brands and are shown for colour reference only.
+            </p>
+            <p class="mb-1">
+                Some links on this site may be affiliate links. We may earn a small commission at no extra cost to you.
+            </p>
+            <p class="mb-0">
+                <a href="{% url 'privacy' %}" class="text-muted">Privacy Policy</a>
+                &nbsp;&middot;&nbsp;
+                &copy; {% now "Y" %} Yarnpalette
+            </p>
+        </div>
+    </footer>
+
+    <div id="cookie-banner" class="position-fixed bottom-0 start-0 end-0 p-3"
+         style="background: var(--yf-purple); color: #fff; font-size:0.8rem; z-index:1050; display:none;">
+        <div class="container d-flex align-items-center justify-content-between gap-3 flex-wrap">
+            <span>We use a session cookie to keep you logged in. No tracking or advertising cookies are used.
+                <a href="{% url 'privacy' %}" class="text-white fw-semibold">Learn more</a>
+            </span>
+            <button onclick="dismissCookieBanner()" class="btn btn-sm btn-outline-light flex-shrink-0">Got it</button>
+        </div>
+    </div>
+    <script>
+        (function() {
+            if (!localStorage.getItem('cookieOk')) {
+                document.getElementById('cookie-banner').style.display = 'block';
+            }
+        })();
+        function dismissCookieBanner() {
+            localStorage.setItem('cookieOk', '1');
+            document.getElementById('cookie-banner').style.display = 'none';
+        }
+    </script>
+
     <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
     <script>
         kofiWidgetOverlay.draw('transatlanticcrochet', {

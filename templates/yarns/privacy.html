@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy — Yarnpalette{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8">
+        <h1 class="h3 mb-4">Privacy Policy</h1>
+        <p class="text-muted small">Last updated: June 2026</p>
+
+        <h2 class="h5 mt-4 mb-2">What we collect</h2>
+        <p>When you create an account, we store your username and, if you sign in with Google, your email address. We also store the yarns you mark as favourites.</p>
+        <p>We do not collect payment information, sell your data, or use it for advertising.</p>
+
+        <h2 class="h5 mt-4 mb-2">Cookies</h2>
+        <p>We use a single session cookie to keep you logged in. No tracking or advertising cookies are used. If you use Google Sign-In, Google may set its own cookies subject to <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>.</p>
+
+        <h2 class="h5 mt-4 mb-2">Third-party services</h2>
+        <ul>
+            <li><strong>Google OAuth</strong> — optional sign-in via Google. We receive your name and email address from Google if you choose this option.</li>
+            <li><strong>Ko-fi</strong> — a voluntary tip widget. Ko-fi's own <a href="https://ko-fi.com/privacy" target="_blank" rel="noopener">privacy policy</a> applies if you interact with it.</li>
+        </ul>
+
+        <h2 class="h5 mt-4 mb-2">Product images and data</h2>
+        <p>Yarn names, images, and product information displayed on this site belong to their respective brands. They are shown for colour reference purposes only, and each result links back to the original product page.</p>
+
+        <h2 class="h5 mt-4 mb-2">Your rights</h2>
+        <p>You can delete your account and all associated data at any time by contacting us. Under GDPR you also have the right to access, correct, or export your data.</p>
+
+        <h2 class="h5 mt-4 mb-2">Contact</h2>
+        <p>Questions about this policy? Email us at <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.</p>
+    </div>
+</div>
+{% endblock %}
