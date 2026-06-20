@@ -54,6 +54,39 @@
                 </div>
             </div>
 
+            <hr class="my-3">
+
+            <details class="mb-3">
+                <summary class="text-muted small" style="cursor:pointer;">Filters <span class="text-secondary">(optional)</span></summary>
+                <div class="mt-3 d-flex flex-column gap-3">
+                    <div>
+                        <label for="fiber" class="form-label small">Fiber contains</label>
+                        <input type="text" class="form-control form-control-sm" id="fiber" name="fiber"
+                               placeholder="e.g. wool, cotton, acrylic">
+                    </div>
+                    <div>
+                        <label for="yarn_type" class="form-label small">Yarn type</label>
+                        <select class="form-select form-select-sm" id="yarn_type" name="yarn_type">
+                            <option value="">— any —</option>
+                            {% for value, label in yarn_types %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label small">Skein weight (grams)</label>
+                        <div class="d-flex gap-2 align-items-center">
+                            <input type="number" class="form-control form-control-sm" name="min_weight"
+                                   placeholder="min" min="0" style="width:90px;">
+                            <span class="text-muted small">to</span>
+                            <input type="number" class="form-control form-control-sm" name="max_weight"
+                                   placeholder="max" min="0" style="width:90px;">
+                            <span class="text-muted small">g</span>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
             <button type="submit" class="btn btn-dark">Find Matching Yarn</button>
         </form>
 

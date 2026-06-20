@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 
 from color.selector import ColorSelector, color_difference
 from scrapers import SCRAPERS
-from .models import Yarn
+from .models import Yarn, YarnType
 
 ITEMS_PER_PAGE = 9
 _selector = ColorSelector()
@@ -14,6 +14,7 @@ def index(request):
     return render(request, "yarns/index.html", {
         "yarn_count": Yarn.objects.count(),
         "sources": sources,
+        "yarn_types": YarnType.choices,
     })
 
 
@@ -25,6 +26,31 @@ def _hex_to_rgb(hex_color: str) -> tuple | None:
         return (int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16))
     except ValueError:
         return None
+
+
+def _parse_filters(post):
+    filters = {}
+    if fiber := post.get("fiber", "").strip():
+        filters["fiber"] = fiber
+    if yarn_type := post.get("yarn_type", "").strip():
+        filters["yarn_type"] = yarn_type
+    if (v := post.get("min_weight", "").strip()).isdigit():
+        filters["min_weight"] = int(v)
+    if (v := post.get("max_weight", "").strip()).isdigit():
+        filters["max_weight"] = int(v)
+    return filters
+
+
+def _apply_filters(queryset, filters):
+    if f := filters.get("fiber"):
+        queryset = queryset.filter(fiber__icontains=f)
+    if t := filters.get("yarn_type"):
+        queryset = queryset.filter(yarn_type=t)
+    if w := filters.get("min_weight"):
+        queryset = queryset.filter(skein_weight_grams__gte=w)
+    if w := filters.get("max_weight"):
+        queryset = queryset.filter(skein_weight_grams__lte=w)
+    return queryset
 
 
 def search(request):
@@ -43,16 +69,19 @@ def search(request):
             return render(request, "yarns/index.html", {
                 "error": "No dominant color found — the image may be entirely white.",
                 "yarn_count": Yarn.objects.count(),
+                "yarn_types": YarnType.choices,
             })
 
         request.session["reference_color"] = list(reference_color)
+        request.session["filters"] = _parse_filters(request.POST)
     else:
         stored = request.session.get("reference_color")
         if not stored:
             return redirect("index")
         reference_color = tuple(stored)
 
-    yarns = Yarn.objects.exclude(color_r=None)
+    filters = request.session.get("filters", {})
+    yarns = _apply_filters(Yarn.objects.exclude(color_r=None), filters)
     results = sorted(
         [
             {"yarn": yarn, "score": color_difference(reference_color, yarn.dominant_color)}
@@ -68,4 +97,5 @@ def search(request):
         "page_obj": page_obj,
         "total_count": len(results),
         "reference_color": "rgb({},{},{})".format(*reference_color),
+        "filters": filters,
     })

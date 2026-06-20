@@ -44,6 +44,9 @@ class Command(BaseCommand):
                         "color_r": color[0] if color else None,
                         "color_g": color[1] if color else None,
                         "color_b": color[2] if color else None,
+                        "fiber": data.get("fiber", ""),
+                        "yarn_type": data.get("yarn_type", ""),
+                        "skein_weight_grams": data.get("skein_weight_grams"),
                     },
                 )
                 if is_new:

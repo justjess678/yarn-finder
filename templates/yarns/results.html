@@ -3,7 +3,7 @@
 {% block title %}Yarn Finder — Results{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center mb-4 gap-3">
+<div class="d-flex align-items-center mb-3 gap-3">
     <div class="color-swatch" style="background: {{ reference_color }};" title="Reference color"></div>
     <div>
         <h1 class="h4 mb-0">Closest matches</h1>
@@ -11,6 +11,15 @@
     </div>
     <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-sm ms-auto">New search</a>
 </div>
+
+{% if filters %}
+<div class="d-flex flex-wrap gap-2 mb-3">
+    {% if filters.fiber %}<span class="badge bg-secondary">Fiber: {{ filters.fiber }}</span>{% endif %}
+    {% if filters.yarn_type %}<span class="badge bg-secondary">Type: {{ filters.yarn_type }}</span>{% endif %}
+    {% if filters.min_weight %}<span class="badge bg-secondary">Min {{ filters.min_weight }}g</span>{% endif %}
+    {% if filters.max_weight %}<span class="badge bg-secondary">Max {{ filters.max_weight }}g</span>{% endif %}
+</div>
+{% endif %}
 
 <div class="row row-cols-3 g-3 mb-4">
     {% for item in page_obj %}
