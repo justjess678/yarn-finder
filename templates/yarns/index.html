@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Yarn Finder — Find Your Color{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h1 class="h3 mb-4">Find Matching Yarn</h1>
+
+        {% if error %}
+        <div class="alert alert-warning">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="{% url 'search' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="reference_image" class="form-label">Upload a reference image</label>
+                <input
+                    class="form-control"
+                    type="file"
+                    id="reference_image"
+                    name="reference_image"
+                    accept="image/*"
+                    required
+                >
+                <div class="form-text">Upload any image — the app will extract its dominant color and find the closest yarns.</div>
+            </div>
+            <button type="submit" class="btn btn-dark">Find Matching Yarn</button>
+        </form>
+
+        <hr class="my-4">
+
+        <p class="text-muted small">
+            {% if yarn_count %}
+                {{ yarn_count }} yarn{{ yarn_count|pluralize }} indexed.
+            {% else %}
+                No yarns indexed yet. Run <code>python manage.py scrape_yarns</code> to populate the database.
+            {% endif %}
+        </p>
+    </div>
+</div>
+{% endblock %}

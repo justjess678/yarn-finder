@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Django
+db.sqlite3
+staticfiles/
+media/
+
+# Environment
+.env
+.venv/
+venv/
+
+# IDE
+.idea/
+
+# Build artifacts
+build/
+dist/
+*.spec
+
+# Images cache
+images/
+reference/

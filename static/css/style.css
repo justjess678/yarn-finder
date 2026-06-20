@@ -1,0 +1,16 @@
+.yarn-card:hover {
+    box-shadow: 0 0 0 2px #212529;
+}
+
+.yarn-img {
+    height: 150px;
+    object-fit: cover;
+}
+
+.color-swatch {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    flex-shrink: 0;
+}

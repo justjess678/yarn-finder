@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Yarn Finder — Results{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-4 gap-3">
+    <div class="color-swatch" style="background: {{ reference_color }};" title="Reference color"></div>
+    <div>
+        <h1 class="h4 mb-0">Closest matches</h1>
+        <small class="text-muted">{{ total_count }} yarn{{ total_count|pluralize }} compared &mdash; showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</small>
+    </div>
+    <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-sm ms-auto">New search</a>
+</div>
+
+<div class="row row-cols-3 g-3 mb-4">
+    {% for item in page_obj %}
+    <div class="col">
+        <a href="{{ item.yarn.url }}" target="_blank" class="card yarn-card text-decoration-none text-dark h-100">
+            <img src="{{ item.yarn.image_url }}" class="card-img-top yarn-img" alt="{{ item.yarn.name }}">
+            <div class="card-body p-2">
+                <p class="card-title small mb-1 fw-semibold">{{ item.yarn.name }}</p>
+                <p class="card-text small text-muted">Score: {{ item.score|floatformat:1 }}</p>
+            </div>
+        </a>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p class="text-muted">No results. Make sure yarns have been scraped and color-indexed.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<nav aria-label="Results pagination">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="{% url 'search' %}?page={{ page_obj.previous_page_number }}">Previous</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+        {% endif %}
+
+        <li class="page-item disabled">
+            <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{% url 'search' %}?page={{ page_obj.next_page_number }}">Next</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endblock %}
