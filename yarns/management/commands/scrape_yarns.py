@@ -27,13 +27,22 @@ class Command(BaseCommand):
             yarn_data = scraper.scrape()
 
             created = updated = 0
+            existing_colors = {
+                yarn.url: (yarn.color_r, yarn.color_g, yarn.color_b)
+                for yarn in Yarn.objects.filter(source=source_id, color_r__isnull=False)
+            }
+
             for data in yarn_data:
-                color = None
-                try:
-                    response = requests.get(data["image_url"], timeout=10)
-                    color = selector.get_color_from_bytes(response.content)
-                except Exception as e:
-                    self.stdout.write(f"  Color fetch failed for {data['name']}: {e}")
+                cached = existing_colors.get(data["url"])
+                if cached:
+                    color = cached
+                else:
+                    color = None
+                    try:
+                        response = requests.get(data["image_url"], timeout=10)
+                        color = selector.get_color_from_bytes(response.content)
+                    except Exception as e:
+                        self.stdout.write(f"  Color fetch failed for {data['name']}: {e}")
 
                 _, is_new = Yarn.objects.update_or_create(
                     url=data["url"],

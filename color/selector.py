@@ -24,13 +24,13 @@ class ColorSelector:
         return self._dominant_non_white(image)
 
     def _dominant_non_white(self, image: Image.Image):
+        image = image.resize((50, 50), Image.LANCZOS)
         pixels = np.array(image).reshape(-1, 3)
         mask = np.all(pixels < self.white_threshold, axis=1)
         non_white = pixels[mask]
         if len(non_white) == 0:
             return None
-        unique, counts = np.unique(non_white, axis=0, return_counts=True)
-        return tuple(unique[counts.argmax()].tolist())
+        return tuple(np.mean(non_white, axis=0).round().astype(int).tolist())
 
 
 def color_difference(color1: tuple, color2: tuple) -> float:
