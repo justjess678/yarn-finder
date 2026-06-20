@@ -6,6 +6,7 @@ from scrapers import SCRAPERS
 from .models import Yarn, YarnType
 
 ITEMS_PER_PAGE = 9
+MAX_RESULTS = 200
 _selector = ColorSelector()
 
 
@@ -90,7 +91,7 @@ def search(request):
             for yarn in yarns
         ],
         key=lambda x: x["score"],
-    )
+    )[:MAX_RESULTS]
 
     paginator = Paginator(results, ITEMS_PER_PAGE)
     page_obj = paginator.get_page(request.GET.get("page", 1))
