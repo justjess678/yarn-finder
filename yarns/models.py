@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -36,3 +37,11 @@ class Yarn(models.Model):
 
     class Meta:
         ordering = ["source", "name"]
+
+
+class Favourite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="favourites")
+    yarn = models.ForeignKey(Yarn, on_delete=models.CASCADE, related_name="favourited_by")
+
+    class Meta:
+        unique_together = ("user", "yarn")

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Yarnpalette — My Favourites{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-4 gap-3">
+    <h1 class="h3 mb-0">My Favourites</h1>
+    <span class="text-muted small ms-1">{{ favourites|length }} yarn{{ favourites|length|pluralize }}</span>
+    <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-sm ms-auto">New search</a>
+</div>
+
+{% if favourites %}
+<div class="row row-cols-3 g-3">
+    {% for fav in favourites %}
+    <div class="col">
+        <div class="card yarn-card h-100 position-relative">
+            <button class="star-btn starred" data-yarn-id="{{ fav.yarn.id }}" title="Remove from favourites">★</button>
+            <a href="{{ fav.yarn.url }}" target="_blank" class="text-decoration-none text-dark">
+                <img src="{{ fav.yarn.image_url }}" class="card-img-top yarn-img" alt="{{ fav.yarn.name }}">
+                <div class="card-body p-2">
+                    <p class="card-title small mb-1 fw-semibold">{{ fav.yarn.name }}</p>
+                    {% if fav.yarn.fiber %}<p class="card-text small text-muted">{{ fav.yarn.fiber }}</p>{% endif %}
+                </div>
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-muted">No favourites yet — star yarns from your search results to save them here.</p>
+{% endif %}
+
+<script>
+const csrfToken = "{{ csrf_token }}";
+document.querySelectorAll(".star-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+        const id = btn.dataset.yarnId;
+        const resp = await fetch(`/favourites/toggle/${id}/`, {
+            method: "POST",
+            headers: {"X-CSRFToken": csrfToken},
+        });
+        const data = await resp.json();
+        if (!data.starred) {
+            btn.closest(".col").remove();
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -23,13 +23,20 @@
 <div class="row row-cols-3 g-3 mb-4">
     {% for item in page_obj %}
     <div class="col">
-        <a href="{{ item.yarn.url }}" target="_blank" class="card yarn-card text-decoration-none text-dark h-100">
-            <img src="{{ item.yarn.image_url }}" class="card-img-top yarn-img" alt="{{ item.yarn.name }}">
-            <div class="card-body p-2">
-                <p class="card-title small mb-1 fw-semibold">{{ item.yarn.name }}</p>
-                <p class="card-text small text-muted">Score: {{ item.score|floatformat:1 }}</p>
-            </div>
-        </a>
+        <div class="card yarn-card h-100 position-relative">
+            {% if user.is_authenticated %}
+            <button class="star-btn {% if item.yarn.id in fav_ids %}starred{% endif %}"
+                    data-yarn-id="{{ item.yarn.id }}"
+                    title="Save to favourites">★</button>
+            {% endif %}
+            <a href="{{ item.yarn.url }}" target="_blank" class="text-decoration-none text-dark">
+                <img src="{{ item.yarn.image_url }}" class="card-img-top yarn-img" alt="{{ item.yarn.name }}">
+                <div class="card-body p-2">
+                    <p class="card-title small mb-1 fw-semibold">{{ item.yarn.name }}</p>
+                    <p class="card-text small text-muted">Score: {{ item.score|floatformat:1 }}</p>
+                </div>
+            </a>
+        </div>
     </div>
     {% empty %}
     <div class="col-12">
@@ -37,6 +44,23 @@
     </div>
     {% endfor %}
 </div>
+
+{% if user.is_authenticated %}
+<script>
+const csrfToken = "{{ csrf_token }}";
+document.querySelectorAll(".star-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+        const id = btn.dataset.yarnId;
+        const resp = await fetch(`/favourites/toggle/${id}/`, {
+            method: "POST",
+            headers: {"X-CSRFToken": csrfToken},
+        });
+        const data = await resp.json();
+        btn.classList.toggle("starred", data.starred);
+    });
+});
+</script>
+{% endif %}
 
 <nav aria-label="Results pagination">
     <ul class="pagination justify-content-center">

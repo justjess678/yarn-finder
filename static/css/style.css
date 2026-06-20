@@ -163,6 +163,34 @@ body {
     white-space: nowrap;
 }
 
+/* ── Star / favourite button ──────────────────────────── */
+.star-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 1;
+    background: rgba(255,255,255,0.85);
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--yf-beige);
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.star-btn:hover {
+    color: var(--yf-amber);
+    background: #fff;
+}
+.star-btn.starred {
+    color: var(--yf-amber);
+}
+
 /* ── Misc ─────────────────────────────────────────────── */
 hr {
     border-color: var(--yf-beige);

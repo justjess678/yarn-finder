@@ -1,9 +1,12 @@
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_POST
 
 from color.selector import ColorSelector, color_difference
 from scrapers import SCRAPERS
-from .models import Yarn, YarnType
+from .models import Yarn, YarnType, Favourite
 
 ITEMS_PER_PAGE = 9
 MAX_RESULTS = 200
@@ -96,9 +99,36 @@ def search(request):
     paginator = Paginator(results, ITEMS_PER_PAGE)
     page_obj = paginator.get_page(request.GET.get("page", 1))
 
+    fav_ids = set()
+    if request.user.is_authenticated:
+        fav_ids = set(
+            Favourite.objects.filter(user=request.user).values_list("yarn_id", flat=True)
+        )
+
     return render(request, "yarns/results.html", {
         "page_obj": page_obj,
         "total_count": len(results),
         "reference_color": "rgb({},{},{})".format(*reference_color),
         "filters": filters,
+        "fav_ids": fav_ids,
     })
+
+
+@login_required
+@require_POST
+def toggle_favourite(request, yarn_id):
+    yarn = get_object_or_404(Yarn, pk=yarn_id)
+    fav, created = Favourite.objects.get_or_create(user=request.user, yarn=yarn)
+    if not created:
+        fav.delete()
+    return JsonResponse({"starred": created})
+
+
+@login_required
+def profile(request):
+    favourites = (
+        Favourite.objects.filter(user=request.user)
+        .select_related("yarn")
+        .order_by("yarn__name")
+    )
+    return render(request, "yarns/profile.html", {"favourites": favourites})
