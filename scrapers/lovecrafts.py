@@ -66,7 +66,9 @@ class LoveCraftsScraper(BaseScraper):
             driver.get(self.BASE_URL.format(i))
             print(f"Scanning page {i}/{page_count}")
             try:
-                ul = driver.find_element(By.CLASS_NAME, "products__grid")
+                ul = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.CLASS_NAME, "products__grid"))
+                )
                 for a in ul.find_elements(By.XPATH, ".//li//div//a"):
                     href = a.get_attribute("href")
                     if href and href not in seen:
