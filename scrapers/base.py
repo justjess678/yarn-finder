@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 
 from abc import ABC, abstractmethod
+from typing import Iterator
 
 
 class BaseScraper(ABC):
@@ -11,9 +12,6 @@ class BaseScraper(ABC):
     site_url: str = ""
 
     @abstractmethod
-    def scrape(self) -> list[dict]:
-        """
-        Scrape yarn data from the source.
-        Returns a list of dicts with keys: name, url, image_url
-        """
+    def scrape(self) -> Iterator[dict]:
+        """Yields dicts with keys: name, url, image_url (and optionally fiber, yarn_type)."""
         pass

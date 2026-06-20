@@ -23,7 +23,6 @@ class Yarn(models.Model):
     color_b = models.PositiveSmallIntegerField(null=True)
     fiber = models.CharField(max_length=255, blank=True, default="")
     yarn_type = models.CharField(max_length=20, choices=YarnType.choices, blank=True, default="")
-    skein_weight_grams = models.PositiveSmallIntegerField(null=True, blank=True)
     last_scraped = models.DateTimeField(auto_now=True)
 
     @property

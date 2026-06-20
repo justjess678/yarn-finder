@@ -12,14 +12,14 @@ class LoveCraftsScraper(BaseScraper):
     site_url     = "https://www.lovecrafts.com/"
     BASE_URL     = "https://www.lovecrafts.com/en-gb/l/yarns?page={}"
 
-    def scrape(self) -> list[dict]:
+    def scrape(self):
         driver = self._make_driver()
         try:
             page_count = self._get_page_count(driver)
             print("Found {} pages".format(page_count))
             links = self._get_yarn_links(driver, page_count)
             print("Found {} yarn links".format(len(links)))
-            return self._get_yarn_details(driver, links)
+            yield from self._get_yarn_details(driver, links)
         finally:
             try:
                 driver.quit()
@@ -84,9 +84,8 @@ class LoveCraftsScraper(BaseScraper):
         print(links)
         return links
 
-    def _get_yarn_details(self, driver, links: list[str]) -> list[dict]:
+    def _get_yarn_details(self, driver, links: list[str]):
         from selenium.common.exceptions import WebDriverException
-        results = []
         idx = 0
         while idx < len(links):
             url = links[idx]
@@ -119,11 +118,10 @@ class LoveCraftsScraper(BaseScraper):
                     result = self._scrape_colour(driver, url, base_name, variant, variants)
                     if result and result["name"] not in seen_colours:
                         seen_colours.add(result["name"])
-                        results.append(result)
+                        yield result
             except Exception as e:
                 print(f"Detail error for {url}: {e}")
             idx += 1
-        return results
 
     @staticmethod
     def _scrape_colour(driver, url, base_name, variant, all_variants):
@@ -142,7 +140,15 @@ class LoveCraftsScraper(BaseScraper):
                     By.XPATH, ".//span[@data-testid='image-wrapper']//img"
                 ).get_attribute("src")
 
-            return {"name": name, "url": url, "image_url": image_url}
+            fiber = driver.find_element(By.XPATH, '//*[@data-testid="Blend"]//dd').text()
+            yarn_type = driver.find_element(By.XPATH, '//*[@data-testid="Yarn Weight"]//dd').text()
+            return {
+                "name": name,
+                "url": url,
+                "image_url": image_url,
+                "fiber": fiber,
+                "yarn_type": yarn_type
+            }
         except Exception as e:
             print(f"  Colour error ({url}): {e}")
             return None

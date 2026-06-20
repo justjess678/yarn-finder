@@ -38,10 +38,6 @@ def _parse_filters(post):
         filters["fiber"] = fiber
     if yarn_type := post.get("yarn_type", "").strip():
         filters["yarn_type"] = yarn_type
-    if (v := post.get("min_weight", "").strip()).isdigit():
-        filters["min_weight"] = int(v)
-    if (v := post.get("max_weight", "").strip()).isdigit():
-        filters["max_weight"] = int(v)
     brands = post.getlist("brands")
     if brands and set(brands) != set(_all_source_ids()):
         filters["brands"] = brands
@@ -53,10 +49,6 @@ def _apply_filters(queryset, filters):
         queryset = queryset.filter(fiber__icontains=f)
     if t := filters.get("yarn_type"):
         queryset = queryset.filter(yarn_type=t)
-    if w := filters.get("min_weight"):
-        queryset = queryset.filter(skein_weight_grams__gte=w)
-    if w := filters.get("max_weight"):
-        queryset = queryset.filter(skein_weight_grams__lte=w)
     if brands := filters.get("brands"):
         queryset = queryset.filter(source__in=brands)
     return queryset

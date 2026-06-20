@@ -17,8 +17,6 @@
     {% if filters.brands %}{% for b in filters.brands %}<span class="badge bg-secondary">{{ b }}</span>{% endfor %}{% endif %}
     {% if filters.fiber %}<span class="badge bg-secondary">Fiber: {{ filters.fiber }}</span>{% endif %}
     {% if filters.yarn_type %}<span class="badge bg-secondary">Type: {{ filters.yarn_type }}</span>{% endif %}
-    {% if filters.min_weight %}<span class="badge bg-secondary">Min {{ filters.min_weight }}g</span>{% endif %}
-    {% if filters.max_weight %}<span class="badge bg-secondary">Max {{ filters.max_weight }}g</span>{% endif %}
 </div>
 {% endif %}
 
