@@ -59,6 +59,20 @@
             <details class="mb-3">
                 <summary class="text-muted small" style="cursor:pointer;">Filters <span class="text-secondary">(optional)</span></summary>
                 <div class="mt-3 d-flex flex-column gap-3">
+                    {% if sources|length > 1 %}
+                    <div>
+                        <p class="form-label small mb-1">Brands</p>
+                        {% for s in sources %}
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="brands"
+                                   id="brand_{{ s.source_id }}" value="{{ s.source_id }}" checked>
+                            <label class="form-check-label small" for="brand_{{ s.source_id }}">{{ s.display_name }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    {% for s in sources %}<input type="hidden" name="brands" value="{{ s.source_id }}">{% endfor %}
+                    {% endif %}
                     <div>
                         <label for="fiber" class="form-label small">Fiber contains</label>
                         <input type="text" class="form-control form-control-sm" id="fiber" name="fiber"
@@ -102,17 +116,19 @@
     </div>
 </div>
 
-{% if sources %}
+{% with gallery_sources=sources %}
+{% if gallery_sources %}
 <div class="source-gallery mt-5">
     <p class="text-center text-muted small mb-2">Checking colours from</p>
     <div class="marquee-outer">
         <div class="marquee-track">
-            {% for s in sources %}{% include "yarns/_source_logo.html" %}{% endfor %}
-            {% for s in sources %}{% include "yarns/_source_logo.html" %}{% endfor %}
+            {% for s in gallery_sources %}{% if s.site_url %}{% include "yarns/_source_logo.html" %}{% endif %}{% endfor %}
+            {% for s in gallery_sources %}{% if s.site_url %}{% include "yarns/_source_logo.html" %}{% endif %}{% endfor %}
         </div>
     </div>
 </div>
 {% endif %}
+{% endwith %}
 
 <script>
     const picker  = document.getElementById('color_picker');

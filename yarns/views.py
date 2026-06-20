@@ -10,7 +10,7 @@ _selector = ColorSelector()
 
 
 def index(request):
-    sources = [cls for cls in SCRAPERS.values() if cls.display_name and cls.site_url]
+    sources = [cls for cls in SCRAPERS.values() if cls.display_name]
     return render(request, "yarns/index.html", {
         "yarn_count": Yarn.objects.count(),
         "sources": sources,
@@ -28,6 +28,10 @@ def _hex_to_rgb(hex_color: str) -> tuple | None:
         return None
 
 
+def _all_source_ids():
+    return list(SCRAPERS.keys())
+
+
 def _parse_filters(post):
     filters = {}
     if fiber := post.get("fiber", "").strip():
@@ -38,6 +42,9 @@ def _parse_filters(post):
         filters["min_weight"] = int(v)
     if (v := post.get("max_weight", "").strip()).isdigit():
         filters["max_weight"] = int(v)
+    brands = post.getlist("brands")
+    if brands and set(brands) != set(_all_source_ids()):
+        filters["brands"] = brands
     return filters
 
 
@@ -50,6 +57,8 @@ def _apply_filters(queryset, filters):
         queryset = queryset.filter(skein_weight_grams__gte=w)
     if w := filters.get("max_weight"):
         queryset = queryset.filter(skein_weight_grams__lte=w)
+    if brands := filters.get("brands"):
+        queryset = queryset.filter(source__in=brands)
     return queryset
 
 
@@ -70,6 +79,7 @@ def search(request):
                 "error": "No dominant color found — the image may be entirely white.",
                 "yarn_count": Yarn.objects.count(),
                 "yarn_types": YarnType.choices,
+                "sources": [cls for cls in SCRAPERS.values() if cls.display_name],
             })
 
         request.session["reference_color"] = list(reference_color)
