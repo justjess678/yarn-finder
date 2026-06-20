@@ -1,3 +1,4 @@
+import re
 import requests
 
 from .base import BaseScraper
@@ -11,6 +12,7 @@ class HobbiiScraper(BaseScraper):
 
     def scrape(self):
         page = 1
+        seen_products = set()
         while True:
             resp = requests.get(self._PRODUCTS_URL, params={"limit": 250, "page": page}, timeout=15)
             resp.raise_for_status()
@@ -19,6 +21,11 @@ class HobbiiScraper(BaseScraper):
                 break
             print(f"Page {page}: {len(products)} products")
             for product in products:
+                base = re.sub(r'\s+\d+/\d+$', '', product["title"]).strip()
+                if base in seen_products:
+                    print(f"  Skipping duplicate: {product['title']}")
+                    continue
+                seen_products.add(base)
                 yield from self._extract_colours(product)
             page += 1
 
