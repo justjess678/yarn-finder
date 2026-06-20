@@ -33,7 +33,7 @@ class BaseScraper(ABC):
         driver.execute_script(
             "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
         )
-        driver.set_page_load_timeout(30)
+        driver.set_page_load_timeout(90)
         return driver
 
     @staticmethod
