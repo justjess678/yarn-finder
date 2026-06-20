@@ -1,3 +1,4 @@
+import threading
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
@@ -22,20 +23,22 @@ def clear_cache():
 
 
 def scrape_yarn_data():
-    log_message(f"Checking Ice Yarns, please wait...")
-    image_tools.make_data()
-    log_message(f"Done checking Ice Yarns!")
+    def task():
+        log_message("Checking Ice Yarns, please wait...")
+        image_tools.make_data()
+        log_message("Done checking Ice Yarns!")
+    threading.Thread(target=task, daemon=True).start()
 
 
 # Function to index yarns (process images and show results)
 def index_yarns():
-    # Log the result
-    global results
-    log_message(f"Comparing yarn colors, please wait...")
-    results = col_selector.compare_all_yarn_images()
-    log_message(f"Done comparing yarn colors!")
-    #show_results(results)
-    show_page()
+    def task():
+        global results
+        log_message("Comparing yarn colors, please wait...")
+        results = col_selector.compare_all_yarn_images()
+        log_message("Done comparing yarn colors!")
+        root.after(0, show_page)
+    threading.Thread(target=task, daemon=True).start()
 
 
 # Function to let user select and replace the reference image
@@ -93,31 +96,36 @@ items_per_page = 9
 
 # Function to show the images for the current page
 def show_page():
-    # Clear previous images
     for widget in result_frame.winfo_children():
         widget.destroy()
 
-    # Get the items for the current page
     start_idx = page * items_per_page
     end_idx = start_idx + items_per_page
     current_page_results = results[start_idx:end_idx]
 
-    # Display the images in a 3x3 grid
-    for idx, result in enumerate(current_page_results):
-        response = requests.get(result["image_url"])
-        img_data = Image.open(BytesIO(response.content))
-        img_data = img_data.resize((100, 100))  # Resize image for display
-        img = ImageTk.PhotoImage(img_data)
-
-        img_label = tk.Label(result_frame, image=img, cursor="hand2")
-        img_label.image = img  # Keep a reference
-        img_label.grid(row=idx // 3, column=idx % 3, padx=10, pady=10)
-
-        # Bind a click event to open the link
-        img_label.bind("<Button-1>", lambda e, url=result["link"]: open_link(url))
-
-    # Update page number label
     page_label.config(text=f"Page {page + 1} of {((len(results) - 1) // items_per_page) + 1}")
+
+    def fetch_images():
+        loaded = []
+        for result in current_page_results:
+            try:
+                response = requests.get(result["image_url"])
+                img_data = Image.open(BytesIO(response.content)).resize((100, 100))
+                loaded.append((result, img_data))
+            except Exception:
+                loaded.append((result, None))
+        root.after(0, lambda: display_images(loaded))
+
+    def display_images(loaded):
+        for idx, (result, img_data) in enumerate(loaded):
+            if img_data:
+                img = ImageTk.PhotoImage(img_data)
+                img_label = tk.Label(result_frame, image=img, cursor="hand2")
+                img_label.image = img
+                img_label.grid(row=idx // 3, column=idx % 3, padx=10, pady=10)
+                img_label.bind("<Button-1>", lambda e, url=result["link"]: open_link(url))
+
+    threading.Thread(target=fetch_images, daemon=True).start()
 
 # Function to open a link in the browser
 def open_link(url):
@@ -142,10 +150,12 @@ def previous_page():
 
 # Function to log messages
 def log_message(message):
-    log_text.config(state='normal')  # Enable editing to add text
-    log_text.insert(tk.END, message + '\n')  # Insert new message
-    log_text.config(state='disabled')  # Disable editing again
-    log_text.yview(tk.END)  # Scroll to the bottom of the log
+    def _update():
+        log_text.config(state='normal')
+        log_text.insert(tk.END, message + '\n')
+        log_text.config(state='disabled')
+        log_text.yview(tk.END)
+    root.after(0, _update)
 
 
 # Setting up the main window

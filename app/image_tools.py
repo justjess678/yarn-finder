@@ -39,25 +39,22 @@ def read_data():
 
 def make_data():
     clear_data()
-    if not os.path.isfile('yarn_data.json'):
-        # scrape those yarns
-        ice_yarns = IceYarnsScraper()
+    ice_yarns = IceYarnsScraper()
 
-        ice_yarns.get_number_of_pages()
-        ice_yarns.get_yarn_pages()
-        links = ice_yarns.yarn_links
+    ice_yarns.get_number_of_pages()
+    ice_yarns.get_yarn_pages()
+    links = ice_yarns.yarn_links
 
-        # get images for each
-        for link in links:
-            ice_yarns.get_photo(link)
+    for link in links:
+        ice_yarns.get_photo(link)
 
-        result = ice_yarns.get_output()
-        ice_yarns.quit()
+    result = ice_yarns.get_output()
+    ice_yarns.quit()
 
-        print(f"Result: {result}")
+    print(f"Result: {result}")
 
-        with open('yarn_data.json', 'w') as fp:
-            json.dump(result, fp)
+    with open('yarn_data.json', 'w') as fp:
+        json.dump(result, fp)
 
 def get_image_by_url(url):
     try:
