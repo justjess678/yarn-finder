@@ -22,6 +22,12 @@
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-pick-btn" data-bs-toggle="tab"
+                            data-bs-target="#tab-pick" type="button" role="tab">
+                        Pick from image
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
                     <button class="nav-link" id="tab-color-btn" data-bs-toggle="tab"
                             data-bs-target="#tab-color" type="button" role="tab">
                         Pick a color
@@ -31,14 +37,22 @@
 
             <div class="tab-content mb-3">
                 <div class="tab-pane fade show active" id="tab-image" role="tabpanel">
-                    <input
-                        class="form-control"
-                        type="file"
-                        id="reference_image"
-                        name="reference_image"
-                        accept="image/*"
-                    >
+                    <input class="form-control" type="file" id="reference_image"
+                           name="reference_image" accept="image/*">
                     <div class="form-text">The dominant non-white color will be extracted and matched.</div>
+                </div>
+
+                <div class="tab-pane fade" id="tab-pick" role="tabpanel">
+                    <input class="form-control mb-2" type="file" id="pick_image_file" accept="image/*">
+                    <div id="pick-canvas-wrapper" class="d-none">
+                        <canvas id="pick-canvas" style="cursor:crosshair; max-width:100%; border-radius:6px; border:1px solid var(--yf-beige);"></canvas>
+                        <div class="d-flex align-items-center gap-2 mt-2">
+                            <div id="pick-swatch" style="width:28px;height:28px;border-radius:4px;border:1px solid #ccc;"></div>
+                            <span id="pick-hex" class="font-monospace small text-muted"></span>
+                        </div>
+                        <div class="form-text">Click anywhere on the image to pick a colour.</div>
+                    </div>
+                    <input type="hidden" name="color_hex" id="color_hex" value="">
                 </div>
 
                 <div class="tab-pane fade" id="tab-color" role="tabpanel">
@@ -48,7 +62,6 @@
                         <input type="text" class="form-control font-monospace"
                                id="color_hex_display" value="#3d7ab5"
                                maxlength="7" placeholder="#rrggbb" style="width:110px;">
-                        <input type="hidden" name="color_hex" id="color_hex" value="#3d7ab5">
                     </div>
                     <div class="form-text">Type a hex value or use the colour picker.</div>
                 </div>
@@ -118,33 +131,82 @@
 {% endwith %}
 
 <script>
+    const hidden  = document.getElementById('color_hex');
     const picker  = document.getElementById('color_picker');
     const display = document.getElementById('color_hex_display');
-    const hidden  = document.getElementById('color_hex');
 
-    function syncFromPicker() {
+    // --- color picker tab ---
+    picker.addEventListener('input', () => {
         display.value = picker.value;
         hidden.value  = picker.value;
-    }
-
-    function syncFromText() {
+    });
+    display.addEventListener('input', () => {
         const val = display.value.trim();
         if (/^#[0-9a-fA-F]{6}$/.test(val)) {
             picker.value = val;
             hidden.value = val;
         }
-    }
-
-    picker.addEventListener('input', syncFromPicker);
-    display.addEventListener('input', syncFromText);
-
-    // Clear the file input when switching to color tab, and vice versa,
-    // so the view knows which one to use.
-    document.getElementById('tab-color-btn').addEventListener('shown.bs.tab', () => {
-        document.getElementById('reference_image').value = '';
     });
+
+    // --- pick from image tab ---
+    const pickFile    = document.getElementById('pick_image_file');
+    const pickCanvas  = document.getElementById('pick-canvas');
+    const pickWrapper = document.getElementById('pick-canvas-wrapper');
+    const pickSwatch  = document.getElementById('pick-swatch');
+    const pickHex     = document.getElementById('pick-hex');
+    const ctx         = pickCanvas.getContext('2d');
+
+    pickFile.addEventListener('change', () => {
+        const file = pickFile.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                pickCanvas.width  = img.width;
+                pickCanvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                pickWrapper.classList.remove('d-none');
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    pickCanvas.addEventListener('click', (e) => {
+        const rect   = pickCanvas.getBoundingClientRect();
+        const scaleX = pickCanvas.width  / rect.width;
+        const scaleY = pickCanvas.height / rect.height;
+        const cx = Math.round((e.clientX - rect.left) * scaleX);
+        const cy = Math.round((e.clientY - rect.top)  * scaleY);
+
+        const r = 2; // 5×5 averaging square
+        const x0 = Math.max(0, cx - r),  y0 = Math.max(0, cy - r);
+        const w  = Math.min(pickCanvas.width  - x0, r * 2 + 1);
+        const h  = Math.min(pickCanvas.height - y0, r * 2 + 1);
+        const px = ctx.getImageData(x0, y0, w, h).data;
+
+        let rv = 0, gv = 0, bv = 0, n = 0;
+        for (let i = 0; i < px.length; i += 4) { rv += px[i]; gv += px[i+1]; bv += px[i+2]; n++; }
+        rv = Math.round(rv/n); gv = Math.round(gv/n); bv = Math.round(bv/n);
+
+        const hex = '#' + [rv, gv, bv].map(v => v.toString(16).padStart(2,'0')).join('');
+        hidden.value          = hex;
+        pickSwatch.style.background = hex;
+        pickHex.textContent   = hex;
+    });
+
+    // --- tab switching: clear irrelevant inputs ---
     document.getElementById('tab-image-btn').addEventListener('shown.bs.tab', () => {
         hidden.value = '';
+    });
+    document.getElementById('tab-pick-btn').addEventListener('shown.bs.tab', () => {
+        document.getElementById('reference_image').value = '';
+        hidden.value = '';
+    });
+    document.getElementById('tab-color-btn').addEventListener('shown.bs.tab', () => {
+        document.getElementById('reference_image').value = '';
+        hidden.value = picker.value;
     });
 </script>
 {% endblock %}
