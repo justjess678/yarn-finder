@@ -111,10 +111,11 @@ class IstexScraper(BaseScraper):
                     if not colour_name:
                         continue
                     name = f"{base_name}: {colour_name}"
+                    colour_slug = colour_name.lower().replace(" ", "-").replace("/", "-")
                     print(f"  {name}")
                     yield {
                         "name": name,
-                        "url": url,
+                        "url": f"{url}#color-{colour_slug}",
                         "image_url": image_url,
                         "fiber": fiber,
                         "yarn_type": "",

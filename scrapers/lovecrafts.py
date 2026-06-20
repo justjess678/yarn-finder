@@ -142,9 +142,10 @@ class LoveCraftsScraper(BaseScraper):
 
             fiber = driver.find_element(By.XPATH, '//*[@data-testid="Blend"]//dd').text()
             yarn_type = driver.find_element(By.XPATH, '//*[@data-testid="Yarn Weight"]//dd').text()
+            colour_slug = color_el.text.lower().replace(" ", "-").replace("/", "-")
             return {
                 "name": name,
-                "url": url,
+                "url": f"{url}#color-{colour_slug}",
                 "image_url": image_url,
                 "fiber": fiber,
                 "yarn_type": yarn_type

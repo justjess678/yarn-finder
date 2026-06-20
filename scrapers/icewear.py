@@ -120,10 +120,12 @@ class IcewearScraper(BaseScraper):
                         if name in seen_colours:
                             continue
                         seen_colours.add(name)
+                        colour_slug = colour_name.lower().replace(" ", "-").replace("/", "-")
+                        variant_url = driver.current_url.split("#")[0] + f"#color-{colour_slug}"
                         print(f"  {name}")
                         yield {
                             "name": name,
-                            "url": driver.current_url,
+                            "url": variant_url,
                             "image_url": image_url,
                             "fiber": fiber,
                             "yarn_type": "",
