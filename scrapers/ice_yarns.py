@@ -1,8 +1,4 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-
-from .base import BaseScraper
+from .base import *
 
 
 class IceYarnsScraper(BaseScraper):

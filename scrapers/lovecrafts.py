@@ -1,7 +1,7 @@
 import math
 import re
 
-from base import *
+from .base import *
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 

@@ -4,9 +4,9 @@ Run from the scrapers/ directory: python test_lovecrafts.py
 """
 import sys
 import os
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from lovecrafts import LoveCraftsScraper
+from scrapers.lovecrafts import LoveCraftsScraper
 
 TEST_YARN_URL = "https://www.lovecrafts.com/en-gb/p/paintbox-simply-dk"
 
