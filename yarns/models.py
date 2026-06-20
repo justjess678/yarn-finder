@@ -22,7 +22,7 @@ class Yarn(models.Model):
     color_g = models.PositiveSmallIntegerField(null=True)
     color_b = models.PositiveSmallIntegerField(null=True)
     fiber = models.CharField(max_length=255, blank=True, default="")
-    yarn_type = models.CharField(max_length=20, choices=YarnType.choices, blank=True, default="")
+    yarn_type = models.CharField(max_length=100, blank=True, default="")
     last_scraped = models.DateTimeField(auto_now=True)
 
     @property
