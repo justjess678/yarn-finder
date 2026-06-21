@@ -5,6 +5,12 @@ from selenium.webdriver.chrome.options import Options
 from abc import ABC, abstractmethod
 from typing import Iterator
 
+try:
+    from selenium.webdriver.remote.remote_connection import RemoteConnection
+    RemoteConnection.set_timeout(360)
+except Exception:
+    pass
+
 
 class BaseScraper(ABC):
     source_id: str = ""
