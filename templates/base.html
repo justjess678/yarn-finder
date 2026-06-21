@@ -57,25 +57,31 @@
         </div>
     </div>
     <script>
+        function loadKofi() {
+            var s = document.createElement('script');
+            s.src = 'https://storage.ko-fi.com/cdn/scripts/overlay-widget.js';
+            s.onload = function() {
+                kofiWidgetOverlay.draw('transatlanticcrochet', {
+                    'type': 'floating-chat',
+                    'floating-chat.donateButton.text': 'Tip Me',
+                    'floating-chat.donateButton.background-color': '#ff38b8',
+                    'floating-chat.donateButton.text-color': '#fff'
+                });
+            };
+            document.body.appendChild(s);
+        }
         (function() {
-            if (!localStorage.getItem('cookieOk')) {
+            if (localStorage.getItem('cookieOk')) {
+                loadKofi();
+            } else {
                 document.getElementById('cookie-banner').style.display = 'block';
             }
         })();
         function dismissCookieBanner() {
             localStorage.setItem('cookieOk', '1');
             document.getElementById('cookie-banner').style.display = 'none';
+            loadKofi();
         }
-    </script>
-
-    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
-    <script>
-        kofiWidgetOverlay.draw('transatlanticcrochet', {
-            'type': 'floating-chat',
-            'floating-chat.donateButton.text': 'Tip Me',
-            'floating-chat.donateButton.background-color': '#ff38b8',
-            'floating-chat.donateButton.text-color': '#fff'
-        });
     </script>
 </body>
 </html>
