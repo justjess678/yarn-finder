@@ -117,13 +117,13 @@ class KingColeScraper(BaseScraper):
         return links
 
     def _get_yarn_details(self, driver, links: list[str]):
-        from selenium.common.exceptions import WebDriverException
         idx = 0
         while idx < len(links):
             url = links[idx]
             print("Checking yarn link: {}".format(url))
             try:
                 driver.get(url)
+                time.sleep(2)  # Wait for page to load
             except Exception as e:
                 if "tab crashed" in str(e).lower():
                     print(f"Tab crashed on {url}, restarting driver and retrying...")
@@ -131,26 +131,39 @@ class KingColeScraper(BaseScraper):
                         driver.quit()
                     except Exception:
                         pass
-                    driver = self._make_driver()
-                    continue  # retry same url
+                    driver = self._make_driver_with_images()
+                    continue
                 print(f"Skipping {url}: {e}")
                 idx += 1
                 continue
+
             try:
-                WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.CLASS_NAME, "variant-name"))
-                )
-                base_name = driver.find_element(
-                    By.XPATH, "//h1[contains(@class,'sf-heading__title')]"
-                ).text
-                print(base_name)
-                variants = driver.find_elements(By.CLASS_NAME, "grid-variants__variant")
-                seen_colours = set()
-                for variant in [None] + list(variants):
-                    result = self._scrape_colour(driver, url, base_name, variant, variants)
-                    if result and result["name"] not in seen_colours:
-                        seen_colours.add(result["name"])
-                        yield result
+                # Wait for any product content to load (WooCommerce compatible)
+                try:
+                    WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, "h1, .product-title"))
+                    )
+                except Exception:
+                    pass
+
+                # Get product name
+                base_name = ""
+                try:
+                    base_name = driver.find_element(By.CSS_SELECTOR, "h1.product-title, h1").text.strip()
+                except Exception:
+                    pass
+
+                if not base_name:
+                    print(f"  Could not find product name for {url}")
+                    idx += 1
+                    continue
+
+                print(f"  Found: {base_name}")
+
+                # For now, just yield the main product once
+                result = self._scrape_colour(driver, url, base_name, None, [])
+                if result:
+                    yield result
             except Exception as e:
                 print(f"Detail error for {url}: {e}")
             idx += 1
