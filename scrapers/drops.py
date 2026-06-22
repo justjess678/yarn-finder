@@ -1,4 +1,6 @@
 from .base import *
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 
 
@@ -19,18 +21,28 @@ class DropsScraper(BaseScraper):
                 pass
 
     def _scrape_all(self, driver):
-        driver.set_page_load_timeout(8)
-        driver.set_script_timeout(5)
-        
+        driver.set_page_load_timeout(60)
+        driver.set_script_timeout(30)
+
         try:
+            print("Loading DROPS listing page (this may take a minute due to Cloudflare)...")
             driver.get(self.BASE_URL)
         except Exception as e:
-            print(f"Page load timed out: {str(e)[:50]}")
-        
+            print(f"Page load error: {str(e)[:50]}")
+
+        print("Waiting for products to render...")
+        try:
+            # Wait for at least 20 products to load
+            WebDriverWait(driver, 30).until(
+                lambda d: len(d.find_elements(By.CSS_SELECTOR, ".yarns .yarn")) > 20
+            )
+        except Exception:
+            print("Timeout waiting for products, continuing anyway...")
+
         print("Scanning listing page")
-        time.sleep(3)
-        
-        # Get product divs from listing - don't wait, just extract
+        time.sleep(2)
+
+        # Get product divs from listing
         yarn_divs = driver.find_elements(By.CSS_SELECTOR, ".yarns .yarn")
         print(f"Found {len(yarn_divs)} products")
 
