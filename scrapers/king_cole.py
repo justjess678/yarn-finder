@@ -123,49 +123,40 @@ class KingColeScraper(BaseScraper):
             print("Checking yarn link: {}".format(url))
             try:
                 driver.get(url)
-                time.sleep(2)  # Wait for page to load
+                time.sleep(1.5)
             except Exception as e:
                 if "tab crashed" in str(e).lower():
-                    print(f"Tab crashed on {url}, restarting driver and retrying...")
+                    print(f"  Tab crashed, restarting driver...")
                     try:
                         driver.quit()
                     except Exception:
                         pass
                     driver = self._make_driver_with_images()
                     continue
-                print(f"Skipping {url}: {e}")
+                print(f"  Skipping (load error): {e}")
                 idx += 1
                 continue
 
             try:
-                # Wait for any product content to load (WooCommerce compatible)
+                # Get product name quickly
                 try:
-                    WebDriverWait(driver, 10).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, "h1, .product-title"))
-                    )
+                    base_name = driver.find_element(By.CSS_SELECTOR, "h1").text.strip()
                 except Exception:
-                    pass
+                    base_name = "Unknown Yarn"
 
-                # Get product name
-                base_name = ""
-                try:
-                    base_name = driver.find_element(By.CSS_SELECTOR, "h1.product-title, h1").text.strip()
-                except Exception:
-                    pass
-
-                if not base_name:
-                    print(f"  Could not find product name for {url}")
+                if not base_name or base_name == "Unknown Yarn":
+                    print(f"  No product title found")
                     idx += 1
                     continue
 
-                print(f"  Found: {base_name}")
+                print(f"  {base_name}")
 
-                # For now, just yield the main product once
+                # Yield main product
                 result = self._scrape_colour(driver, url, base_name, None, [])
                 if result:
                     yield result
             except Exception as e:
-                print(f"Detail error for {url}: {e}")
+                print(f"  Error: {e}")
             idx += 1
 
     @staticmethod
