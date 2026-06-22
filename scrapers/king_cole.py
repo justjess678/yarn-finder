@@ -11,7 +11,7 @@ class KingColeScraper(BaseScraper):
     source_id    = "king_cole"
     display_name = "King Cole"
     site_url     = "https://www.kingcole.com/"
-    BASE_URL     = "https://www.kingcole.com/yarns"
+    BASE_URL     = "https://www.kingcole.com/product-category/yarn/"
 
     def _make_driver_with_images(self):
         from selenium.webdriver.chrome.options import Options
@@ -53,36 +53,30 @@ class KingColeScraper(BaseScraper):
                 pass
 
     def _get_page_count(self, driver) -> int:
-        import time
         print("Getting page count...")
         driver.get(self.BASE_URL)
         self._accept_cookies(driver)
+        time.sleep(5)
 
-        # Wait for any content to load, check multiple times
-        for wait_time in [3, 5, 10]:
-            time.sleep(wait_time - (wait_time - 3))
-            page_source = driver.page_source
-            if "pageNotFound" not in page_source and "wooFilterItems" in page_source:
-                print(f"Page loaded after {wait_time}s")
-                break
-            if wait_time == 10:
-                print(f"Still showing 404 after {wait_time}s")
-
-        # Check for pagination
+        # WooCommerce pagination - look for page numbers
         try:
-            pagination_items = driver.find_elements(By.CSS_SELECTOR, "li.page-numbers a.page-link")
+            # Try common WooCommerce selectors
+            pagination_items = driver.find_elements(By.CSS_SELECTOR,
+                "a.page-numbers, .woocommerce-pagination a")
             page_numbers = []
             for el in pagination_items:
                 text = el.text.strip()
                 if text.isdigit():
                     page_numbers.append(int(text))
             if page_numbers:
-                return max(page_numbers)
-        except Exception:
-            pass
+                result = max(page_numbers)
+                print(f"Found {result} pages")
+                return result
+        except Exception as e:
+            print(f"Error finding pagination: {e}")
 
-        print("Defaulting to 7 pages")
-        return 7
+        print("Defaulting to 1 page")
+        return 1
 
     def _get_yarn_links(self, driver, page_count: int) -> list[str]:
         seen = set()
@@ -91,24 +85,18 @@ class KingColeScraper(BaseScraper):
         for i in range(1, page_count + 1):
             print(f"Scanning page {i}/{page_count}")
             try:
-                time.sleep(3)
+                time.sleep(2)
 
-                # Use JavaScript to find product links since DOM rendering is failing
-                js_code = """
-                return Array.from(document.querySelectorAll('a[href*="/product/"]')).map(a => a.href).filter(h => h);
-                """
-                product_links = driver.execute_script(js_code)
-
-                if not product_links:
-                    print(f"  No product links found via JS, trying CSS selector...")
-                    grid = driver.find_element(By.CSS_SELECTOR, "div.wooFilterItems")
-                    for a in grid.find_elements(By.CSS_SELECTOR, ".itemSmall a"):
-                        href = a.get_attribute("href")
-                        if href and "/product/" in href:
-                            product_links.append(href)
+                # Use the selector that worked: a[href*="/product/"]
+                product_links = driver.execute_script("""
+                return Array.from(document.querySelectorAll('a[href*="/product/"]'))
+                    .map(a => a.href)
+                    .filter((h, idx, arr) => arr.indexOf(h) === idx && h.includes('/product/'))
+                    .slice(0, 50);
+                """)
 
                 for href in product_links:
-                    if href not in seen:
+                    if href not in seen and "/product/" in href:
                         seen.add(href)
                         links.append(href)
 
@@ -116,13 +104,11 @@ class KingColeScraper(BaseScraper):
 
                 # Click next page button if not on last page
                 if i < page_count:
-                    next_page_num = i + 1
-                    driver.execute_script(f"""
-                    var links = Array.from(document.querySelectorAll('a'));
-                    var nextLink = links.find(a => a.textContent.trim() === '{next_page_num}');
+                    driver.execute_script("""
+                    var nextLink = document.querySelector('a.next');
                     if (nextLink) nextLink.click();
                     """)
-                    time.sleep(3)
+                    time.sleep(2)
             except Exception as e:
                 print(f"Page {i} error: {e}")
                 break
@@ -173,22 +159,44 @@ class KingColeScraper(BaseScraper):
     def _scrape_colour(driver, url, base_name, variant, all_variants):
         if variant is not None:
             driver.execute_script("arguments[0].click();", variant)
+            time.sleep(0.5)
+
         try:
-            color_el = driver.find_element(By.CLASS_NAME, "variant-name")
-            name = f"{base_name}: {color_el.text}"
-
-            # Image src is on the <img> inside the variant's image-wrapper span.
-            # For the default run (no click), use the first variant.
-            source_variant = variant or (all_variants[0] if all_variants else None)
+            # Get main product image
             image_url = None
-            if source_variant:
-                image_url = source_variant.find_element(
-                    By.XPATH, ".//span[@data-testid='image-wrapper']//img"
-                ).get_attribute("src")
+            try:
+                img = driver.find_element(By.CSS_SELECTOR, ".wp-post-image, img.woocommerce-product-gallery__image img")
+                image_url = img.get_attribute("src") or img.get_attribute("data-src")
+            except Exception:
+                pass
 
-            fiber = driver.find_element(By.XPATH, '//*[@data-testid="Blend"]//dd').text()
-            yarn_type = driver.find_element(By.XPATH, '//*[@data-testid="Yarn Weight"]//dd').text()
-            colour_slug = color_el.text.lower().replace(" ", "-").replace("/", "-")
+            # Get fiber/blend info
+            fiber = ""
+            try:
+                fiber_el = driver.find_element(By.XPATH, "//th[contains(text(), 'Blend')]/../td | //td[contains(text(), 'Blend')]/../td")
+                fiber = fiber_el.text.strip()
+            except Exception:
+                pass
+
+            # Get yarn weight/type
+            yarn_type = ""
+            try:
+                weight_el = driver.find_element(By.XPATH, "//th[contains(text(), 'Weight')]/../td | //th[contains(text(), 'Yarn Weight')]/../td")
+                yarn_type = weight_el.text.strip()
+            except Exception:
+                pass
+
+            # Get color from variant or page
+            color_text = base_name
+            try:
+                color_el = driver.find_element(By.CSS_SELECTOR, ".variable-item-color, .product-attribute, [data-attribute_name*=color]")
+                color_text = color_el.text.strip() or base_name
+            except Exception:
+                pass
+
+            name = f"{base_name}: {color_text}" if color_text != base_name else base_name
+            colour_slug = color_text.lower().replace(" ", "-").replace("/", "-")
+
             return {
                 "name": name,
                 "url": f"{url}#color-{colour_slug}",
