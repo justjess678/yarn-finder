@@ -13,39 +13,12 @@ class KingColeScraper(BaseScraper):
     site_url     = "https://www.kingcole.com/"
     BASE_URL     = "https://www.kingcole.com/product-category/yarn/"
 
-    def _make_driver_with_images(self):
-        from selenium.webdriver.chrome.options import Options
-        from selenium import webdriver
-        options = Options()
-        options.add_argument("--headless=new")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--window-size=1920,1080")
-        options.add_argument("--disable-extensions")
-        options.add_argument("--disable-plugins")
-        options.add_argument("--disable-images")
-        options.add_argument("--js-flags=--max-old-space-size=512")
-        options.add_argument(
-            "user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-            "(KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
-        )
-        options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        options.add_experimental_option("useAutomationExtension", False)
-        driver = webdriver.Chrome(options=options)
-        driver.execute_script(
-            "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
-        )
-        driver.set_page_load_timeout(300)
-        return driver
-
     def scrape(self):
-        driver = self._make_driver_with_images()
+        driver = self._make_driver()
         try:
             page_count = self._get_page_count(driver)
             print("Found {} pages".format(page_count))
-            links = self._get_yarn_links(driver, page_count)
-            print("Found {} yarn links".format(len(links)))
-            yield from self._get_yarn_details(driver, links)
+            yield from self._scrape_all_pages(driver, page_count)
         finally:
             try:
                 driver.quit()
@@ -75,9 +48,8 @@ class KingColeScraper(BaseScraper):
         print("Defaulting to 1 page")
         return 1
 
-    def _get_yarn_links(self, driver, page_count: int) -> list[str]:
+    def _scrape_all_pages(self, driver, page_count: int):
         seen = set()
-        links = []
 
         for i in range(1, page_count + 1):
             print(f"Scanning page {i}/{page_count}")
@@ -90,13 +62,17 @@ class KingColeScraper(BaseScraper):
                     .filter((h, idx, arr) => arr.indexOf(h) === idx && h.includes('/product/'));
                 """)
 
+                print(f"  Found {len(product_links)} items on page {i}")
+
+                # Process each link immediately without storing
                 for href in product_links:
                     if href not in seen and "/product/" in href:
                         seen.add(href)
-                        links.append(href)
+                        result = self._get_yarn_details(driver, href)
+                        if result:
+                            yield result
 
-                print(f"  Found {len(product_links)} items on page {i}")
-
+                # Navigate to next page
                 if i < page_count:
                     try:
                         driver.execute_script("""
@@ -120,43 +96,46 @@ class KingColeScraper(BaseScraper):
                 print(f"Page {i} error: {e}")
                 break
 
-        print(f"Found {len(links)} yarn links total")
-        return links
+    def _get_yarn_details(self, driver, url: str):
+        print("Checking yarn link: {}".format(url))
+        try:
+            driver.execute_script("window.stop();")
+            driver.get(url)
+            time.sleep(0.8)
+        except Exception as e:
+            if "tab crashed" in str(e).lower():
+                print(f"  Tab crashed, skipping")
+            else:
+                print(f"  Skipping (load error): {e}")
+            return None
 
-    def _get_yarn_details(self, driver, links: list[str]):
-        for idx, url in enumerate(links):
-            print("Checking yarn link: {}".format(url))
+        try:
             try:
-                driver.get(url)
-                time.sleep(1.5)
-            except Exception as e:
-                if "tab crashed" in str(e).lower():
-                    print(f"  Tab crashed, skipping")
-                else:
-                    print(f"  Skipping (load error): {e}")
-                continue
+                base_name = driver.find_element(By.CSS_SELECTOR, "h1").text.strip()
+            except Exception:
+                base_name = "Unknown Yarn"
 
+            if not base_name or base_name == "Unknown Yarn":
+                print(f"  No product title found")
+                return None
+
+            # Check if it's actually a yarn product (has fiber info)
             try:
-                try:
-                    base_name = driver.find_element(By.CSS_SELECTOR, "h1").text.strip()
-                except Exception:
-                    base_name = "Unknown Yarn"
+                driver.find_element(By.XPATH, "//h3[contains(text(), 'Contains')]/following-sibling::p")
+            except Exception:
+                # If no fiber info, it's likely a pattern/book, skip it
+                print(f"  Not a yarn product (no fiber info), skipping")
+                return None
 
-                if not base_name or base_name == "Unknown Yarn":
-                    print(f"  No product title found")
-                    continue
+            print(f"  {base_name}")
 
-                print(f"  {base_name}")
-
-                result = self._scrape_colour(driver, url, base_name, None, [])
-                if result:
-                    yield result
-
-                # Clear memory every 20 products
-                if (idx + 1) % 20 == 0:
-                    driver.execute_script("window.stop(); document.body.innerHTML='';")
-            except Exception as e:
-                print(f"  Error: {e}")
+            result = self._scrape_colour(driver, url, base_name, None, [])
+            # Aggressively clean up memory
+            driver.execute_script("document.body.innerHTML=''; window.gc && window.gc();")
+            return result
+        except Exception as e:
+            print(f"  Error: {e}")
+            return None
 
     @staticmethod
     def _scrape_colour(driver, url, base_name, variant, all_variants):
