@@ -4,6 +4,7 @@ from .icewear import IcewearScraper
 from .istex import IstexScraper
 from .king_cole import KingColeScraper
 from .lovecrafts import LoveCraftsScraper
+from .sandnes import SandnesScraper
 from .yarnspirations import YarnspirationsScraper
 
 SCRAPERS: dict[str, type] = {
@@ -14,4 +15,5 @@ SCRAPERS: dict[str, type] = {
     IstexScraper.source_id: IstexScraper,
     YarnspirationsScraper.source_id: YarnspirationsScraper,
     KingColeScraper.source_id: KingColeScraper,
+    SandnesScraper.source_id: SandnesScraper,
 }
