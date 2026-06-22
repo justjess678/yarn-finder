@@ -3,7 +3,6 @@ from .ice_yarns import IceYarnsScraper
 from .icewear import IcewearScraper
 from .istex import IstexScraper
 from .king_cole import KingColeScraper
-from .lion_brand import LionBrandScraper
 from .lovecrafts import LoveCraftsScraper
 from .sandnes import SandnesScraper
 from .yarnspirations import YarnspirationsScraper
@@ -17,5 +16,4 @@ SCRAPERS: dict[str, type] = {
     YarnspirationsScraper.source_id: YarnspirationsScraper,
     KingColeScraper.source_id: KingColeScraper,
     SandnesScraper.source_id: SandnesScraper,
-    LionBrandScraper.source_id: LionBrandScraper,
 }
