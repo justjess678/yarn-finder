@@ -177,7 +177,7 @@ class KingColeScraper(BaseScraper):
             # Get fiber/blend info
             fiber = ""
             try:
-                fiber_el = driver.find_element(By.XPATH, "//th[contains(text(), 'Blend')]/../td | //td[contains(text(), 'Blend')]/../td")
+                fiber_el = driver.find_element(By.XPATH, "//h3[contains(text(), 'Contains')]/following-sibling::p")
                 fiber = fiber_el.text.strip()
             except Exception:
                 pass
@@ -185,7 +185,7 @@ class KingColeScraper(BaseScraper):
             # Get yarn weight/type
             yarn_type = ""
             try:
-                weight_el = driver.find_element(By.XPATH, "//th[contains(text(), 'Weight')]/../td | //th[contains(text(), 'Yarn Weight')]/../td")
+                weight_el = driver.find_element(By.XPATH, "//h3[contains(text(), 'Ball Weight')]/following-sibling::p")
                 yarn_type = weight_el.text.strip()
             except Exception:
                 pass
