@@ -58,11 +58,9 @@ class KingColeScraper(BaseScraper):
         self._accept_cookies(driver)
         time.sleep(5)
 
-        # WooCommerce pagination - look for page numbers
+        # King Cole uses ul.pagination with li.page-numbers containing a.page-link
         try:
-            # Try common WooCommerce selectors
-            pagination_items = driver.find_elements(By.CSS_SELECTOR,
-                "a.page-numbers, .woocommerce-pagination a")
+            pagination_items = driver.find_elements(By.CSS_SELECTOR, ".pagination a.page-link")
             page_numbers = []
             for el in pagination_items:
                 text = el.text.strip()
@@ -104,11 +102,26 @@ class KingColeScraper(BaseScraper):
 
                 # Click next page button if not on last page
                 if i < page_count:
-                    driver.execute_script("""
-                    var nextLink = document.querySelector('a.next');
-                    if (nextLink) nextLink.click();
-                    """)
-                    time.sleep(2)
+                    try:
+                        # Close any open modals
+                        driver.execute_script("""
+                        var modals = document.querySelectorAll('.modal-container, .modal, [role="dialog"]');
+                        for (var m of modals) {
+                            var closeBtn = m.querySelector('[aria-label*="close"], [aria-label*="Close"], .close, button[type="button"]');
+                            if (closeBtn) closeBtn.click();
+                            else m.style.display = 'none';
+                        }
+                        """)
+                        time.sleep(0.5)
+
+                        # Click the next page link
+                        pagination_links = driver.find_elements(By.CSS_SELECTOR, ".pagination a.page-link")
+                        if len(pagination_links) > i:
+                            pagination_links[i].click()
+                            time.sleep(2)
+                    except Exception as e:
+                        print(f"  Error clicking page {i+1}: {e}")
+                        break
             except Exception as e:
                 print(f"Page {i} error: {e}")
                 break
