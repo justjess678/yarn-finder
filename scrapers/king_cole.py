@@ -23,8 +23,8 @@ class KingColeScraper(BaseScraper):
         options.add_argument("--window-size=1920,1080")
         options.add_argument("--disable-extensions")
         options.add_argument("--disable-plugins")
-        # Don't disable images - King Cole might need them for routing
-        options.add_argument("--js-flags=--max-old-space-size=256")
+        options.add_argument("--disable-images")
+        options.add_argument("--js-flags=--max-old-space-size=512")
         options.add_argument(
             "user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
             "(KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
@@ -58,7 +58,6 @@ class KingColeScraper(BaseScraper):
         self._accept_cookies(driver)
         time.sleep(5)
 
-        # King Cole uses ul.pagination with li.page-numbers containing a.page-link
         try:
             pagination_items = driver.find_elements(By.CSS_SELECTOR, ".pagination a.page-link")
             page_numbers = []
@@ -85,12 +84,10 @@ class KingColeScraper(BaseScraper):
             try:
                 time.sleep(2)
 
-                # Use the selector that worked: a[href*="/product/"]
                 product_links = driver.execute_script("""
                 return Array.from(document.querySelectorAll('a[href*="/product/"]'))
                     .map(a => a.href)
-                    .filter((h, idx, arr) => arr.indexOf(h) === idx && h.includes('/product/'))
-                    .slice(0, 50);
+                    .filter((h, idx, arr) => arr.indexOf(h) === idx && h.includes('/product/'));
                 """)
 
                 for href in product_links:
@@ -100,10 +97,8 @@ class KingColeScraper(BaseScraper):
 
                 print(f"  Found {len(product_links)} items on page {i}")
 
-                # Click next page button if not on last page
                 if i < page_count:
                     try:
-                        # Close any open modals
                         driver.execute_script("""
                         var modals = document.querySelectorAll('.modal-container, .modal, [role="dialog"]');
                         for (var m of modals) {
@@ -114,7 +109,6 @@ class KingColeScraper(BaseScraper):
                         """)
                         time.sleep(0.5)
 
-                        # Click the next page link
                         pagination_links = driver.find_elements(By.CSS_SELECTOR, ".pagination a.page-link")
                         if len(pagination_links) > i:
                             pagination_links[i].click()
@@ -130,28 +124,19 @@ class KingColeScraper(BaseScraper):
         return links
 
     def _get_yarn_details(self, driver, links: list[str]):
-        idx = 0
-        while idx < len(links):
-            url = links[idx]
+        for idx, url in enumerate(links):
             print("Checking yarn link: {}".format(url))
             try:
                 driver.get(url)
                 time.sleep(1.5)
             except Exception as e:
                 if "tab crashed" in str(e).lower():
-                    print(f"  Tab crashed, restarting driver...")
-                    try:
-                        driver.quit()
-                    except Exception:
-                        pass
-                    driver = self._make_driver_with_images()
-                    continue
-                print(f"  Skipping (load error): {e}")
-                idx += 1
+                    print(f"  Tab crashed, skipping")
+                else:
+                    print(f"  Skipping (load error): {e}")
                 continue
 
             try:
-                # Get product name quickly
                 try:
                     base_name = driver.find_element(By.CSS_SELECTOR, "h1").text.strip()
                 except Exception:
@@ -159,18 +144,19 @@ class KingColeScraper(BaseScraper):
 
                 if not base_name or base_name == "Unknown Yarn":
                     print(f"  No product title found")
-                    idx += 1
                     continue
 
                 print(f"  {base_name}")
 
-                # Yield main product
                 result = self._scrape_colour(driver, url, base_name, None, [])
                 if result:
                     yield result
+
+                # Clear memory every 20 products
+                if (idx + 1) % 20 == 0:
+                    driver.execute_script("window.stop(); document.body.innerHTML='';")
             except Exception as e:
                 print(f"  Error: {e}")
-            idx += 1
 
     @staticmethod
     def _scrape_colour(driver, url, base_name, variant, all_variants):
@@ -179,7 +165,6 @@ class KingColeScraper(BaseScraper):
             time.sleep(0.5)
 
         try:
-            # Get main product image
             image_url = None
             try:
                 img = driver.find_element(By.CSS_SELECTOR, ".wp-post-image, img.woocommerce-product-gallery__image img")
@@ -187,7 +172,6 @@ class KingColeScraper(BaseScraper):
             except Exception:
                 pass
 
-            # Get fiber/blend info
             fiber = ""
             try:
                 fiber_el = driver.find_element(By.XPATH, "//h3[contains(text(), 'Contains')]/following-sibling::p")
@@ -195,7 +179,6 @@ class KingColeScraper(BaseScraper):
             except Exception:
                 pass
 
-            # Get yarn weight/type
             yarn_type = ""
             try:
                 weight_el = driver.find_element(By.XPATH, "//h3[contains(text(), 'Ball Weight')]/following-sibling::p")
@@ -203,7 +186,6 @@ class KingColeScraper(BaseScraper):
             except Exception:
                 pass
 
-            # Get color from variant or page
             color_text = base_name
             try:
                 color_el = driver.find_element(By.CSS_SELECTOR, ".variable-item-color, .product-attribute, [data-attribute_name*=color]")
