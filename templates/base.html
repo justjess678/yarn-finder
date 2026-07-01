@@ -19,6 +19,16 @@
                 <img src="{% static 'images/yarnpalette.png' %}" alt="Logo" height="36"> YarnPalette
             </a>
             <div class="d-flex align-items-center gap-3">
+                <div class="dropdown">
+                    <button class="btn btn-sm nav-link text-white" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Learn
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                        <li><a class="dropdown-item" href="{% url 'about' %}">About</a></li>
+                        <li><a class="dropdown-item" href="{% url 'how_it_works' %}">How It Works</a></li>
+                        <li><a class="dropdown-item" href="{% url 'dye_lots' %}">Dye Lots</a></li>
+                    </ul>
+                </div>
                 {% if user.is_authenticated %}
                 <a href="{% url 'profile' %}" class="nav-link text-white small">★ Favourites</a>
                 <a href="{% url 'account_logout' %}" class="nav-link text-white small">Log out</a>

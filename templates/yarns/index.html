@@ -3,8 +3,22 @@
 {% block title %}Yarnpalette: Find Your Color{% endblock %}
 
 {% block content %}
-<br class="row justify-content-center">
-    <br class="col-md-6">
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="mb-5 p-4 rounded" style="background: linear-gradient(135deg, rgba(220, 189, 198, 0.1), rgba(184, 154, 178, 0.1));">
+            <h2 class="h5 mb-3">How YarnPalette Works</h2>
+            <p class="small mb-3">Finding the <em>exact</em> right yarn colour for a project shouldn't mean squinting at your screen, holding up ten different skeins to a reference photo, or guessing and hoping. YarnPalette takes the guesswork out of colour matching so you can spend more time crafting and less time second-guessing.</p>
+
+            <h3 class="h6 mb-2">Three ways to find your colour</h3>
+            <ul class="small mb-3">
+                <li><strong>Upload a photo:</strong> Got a reference image? We'll average it for you.</li>
+                <li><strong>Pick a spot:</strong> Upload a photo and tap the exact shade you want to match.</li>
+                <li><strong>Use the colour picker:</strong> Already know the shade? Choose it straight from the colour wheel.</li>
+            </ul>
+
+            <p class="small mb-0"><a href="{% url 'how_it_works' %}">Learn more about how the matching works →</a></p>
+        </div>
+
         <h1 class="h3 mb-2">Find Matching Yarn</h1>
         <p class="text-muted mb-4">Got a colour you love and want to knit or crochet with?<br/>Upload a photo, click a spot in an image, or just paste a hex code and we'll search across all the yarn brands we index to find the closest colour matches.<br/>Use the filters below to narrow by fiber or yarn type.</p>
 

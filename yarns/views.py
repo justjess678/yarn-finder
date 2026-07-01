@@ -15,7 +15,7 @@ _selector = ColorSelector()
 
 def index(request):
     tmp = [cls for cls in SCRAPERS.values() if cls.display_name]
-    sources = sorted(tmp, key=lambda cls: cls.display_name)
+    sources = sorted(tmp, key=lambda cls: cls.display_name)c
     return render(request, "yarns/index.html", {
         "yarn_count": Yarn.objects.count(),
         "sources": sources,
@@ -145,6 +145,18 @@ def privacy(request):
     return render(request, "yarns/privacy.html", {
         "contact_email": getattr(settings, "CONTACT_EMAIL", "hello@yarnpalette.com"),
     })
+
+
+def how_it_works(request):
+    return render(request, "yarns/how_it_works.html")
+
+
+def about(request):
+    return render(request, "yarns/about.html")
+
+
+def dye_lots(request):
+    return render(request, "yarns/dye_lots.html")
 
 
 def robots_txt(request):
