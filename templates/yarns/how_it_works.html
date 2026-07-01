@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}How It Works — Yarnpalette{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8">
+        <h1 class="h3 mb-4">How YarnPalette Works</h1>
+
+        <p class="lead">Finding the <em>exact</em> right yarn colour for a project shouldn't mean squinting at your screen, holding up ten different skeins to a reference photo, or guessing and hoping. YarnPalette takes the guesswork out of colour matching so you can spend more time crafting and less time second-guessing.</p>
+
+        <h2 class="h5 mt-4 mb-3">Three ways to find your colour</h2>
+
+        <p><strong>Upload a photo, and we'll average it for you.</strong></p>
+        <p>Got a reference image: a character design, a photo of fabric, a picture of a sunset that inspired your next project? Upload it, and YarnPalette calculates the average colour across the whole image, then finds the yarns that match it most closely.</p>
+
+        <p><strong>Upload a photo and pick your exact spot.</strong></p>
+        <p>Sometimes you don't want the average of a whole image, you want <em>that</em> specific shade, like the deep green of a cloak collar or the exact rust of a character's skirt. Upload your photo and tap the precise point you want to match, and we'll find yarns that correspond to that single colour.</p>
+
+        <p><strong>Use the colour picker directly.</strong></p>
+        <p>Already know the shade you're after? Skip the photo entirely and choose your colour straight from the colour wheel.</p>
+
+        <h2 class="h5 mt-4 mb-3">What happens next</h2>
+
+        <p>Once your colour is selected, YarnPalette compares it against our database of yarn colourways and surfaces the closest matches, so you're not left flipping between browser tabs comparing hex codes to product photos by eye. You can filter results by brand, fibre type, and yarn weight to narrow things down to yarns you'll actually want to work with.</p>
+
+        <h2 class="h5 mt-4 mb-3">Why we built it this way</h2>
+
+        <p>Colour matching by eye is genuinely hard. Screens display colour differently, lighting changes everything, and "close enough" often isn't close enough once you're twelve hours into a project. YarnPalette exists to make that first, frustrating step of a project, <em>finding the right yarn</em>, quick and reliable, so you can get to the part you actually enjoy: making something.</p>
+
+        <hr class="my-5">
+
+        <h2 class="h5 mt-5 mb-3">How the matching algorithm works</h2>
+
+        <p>Under the hood, YarnPalette uses a mathematical approach to color matching. If you're curious about the technical details, here's how it works:</p>
+
+        <h3 class="h6 mt-4 mb-2">1. Extracting the Reference Color</h3>
+        <p>When you provide a reference image or hex color:</p>
+        <ul>
+            <li><strong>If it's an image:</strong> The app shrinks the image to 50×50 pixels (for speed), converts it to RGB, filters out white-ish pixels (anything with RGB values ≥ 200 is considered "white"), and takes the average of all non-white pixels to get a single representative RGB value.</li>
+            <li><strong>If it's a hex code:</strong> It simply converts it to RGB values (0–255 for each channel).</li>
+        </ul>
+
+        <h3 class="h6 mt-4 mb-2">2. Comparing Colors</h3>
+        <p>For each yarn in the database, the app calculates how different its color is from your reference color using <strong>Euclidean distance in RGB color space</strong>:</p>
+        <div class="bg-light p-3 rounded mb-3" style="font-family: monospace; text-align: center;">
+            distance = √[(R₂-R₁)² + (G₂-G₁)² + (B₂-B₁)²]
+        </div>
+        <p>Where:</p>
+        <ul>
+            <li><strong>R₁, G₁, B₁</strong> = your reference color's red, green, blue values</li>
+            <li><strong>R₂, G₂, B₂</strong> = the yarn's stored dominant color values</li>
+        </ul>
+        <p>This creates a single number representing how "far apart" the two colors are in 3D RGB space.</p>
+
+        <h3 class="h6 mt-4 mb-2">3. Ranking Results</h3>
+        <p>All yarns are sorted by this distance score from smallest to largest. <strong>Lower scores = better matches</strong> because a distance of 0 means the colors are identical, and larger numbers mean the colors are increasingly different.</p>
+
+        <h3 class="h6 mt-4 mb-2">The Big Picture</h3>
+        <p>In essence: the algorithm treats colors as points in a 3D cube where each axis is a color channel (red, green, blue), then finds the yarns whose color points are nearest to your reference color point. No guessing, no squinting—just math.</p>
+    </div>
+</div>
+{% endblock %}
