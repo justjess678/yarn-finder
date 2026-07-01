@@ -11,4 +11,5 @@ urlpatterns = [
     path("about/", views.about, name="about"),
     path("dye-lots/", views.dye_lots, name="dye_lots"),
     path("robots.txt", views.robots_txt),
+    path("ads.txt", views.ads_txt),
 ]
