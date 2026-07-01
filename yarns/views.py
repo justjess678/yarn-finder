@@ -163,8 +163,3 @@ def robots_txt(request):
     from django.http import HttpResponse
     content = "User-agent: *\nDisallow: /admin/\nDisallow: /accounts/\n"
     return HttpResponse(content, content_type="text/plain")
-
-
-def ads_txt(request):
-    from django.shortcuts import redirect
-    return redirect("https://srv.adstxtmanager.com/19390/yarnpalette.xyz", permanent=True)
