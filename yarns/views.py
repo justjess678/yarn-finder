@@ -15,7 +15,7 @@ _selector = ColorSelector()
 
 def index(request):
     tmp = [cls for cls in SCRAPERS.values() if cls.display_name]
-    sources = sorted(tmp, key=lambda cls: cls.display_name)c
+    sources = sorted(tmp, key=lambda cls: cls.display_name)
     return render(request, "yarns/index.html", {
         "yarn_count": Yarn.objects.count(),
         "sources": sources,
