@@ -46,6 +46,10 @@
         <div class="bg-light p-3 rounded mb-3" style="font-family: monospace; text-align: center;">
             distance = √[(R₂-R₁)² + (G₂-G₁)² + (B₂-B₁)²]
         </div>
+        <div class="text-center mb-4">
+            <img src="https://pi.math.cornell.edu/~mec/Summer2008/Jones/rectdia.gif" alt="Euclidean distance diagram" style="max-width: 100%; height: auto; border-radius: 6px;">
+            <p class="small text-muted mt-2">The straight-line distance between two points in 2D space. Color matching works the same way, but in 3D (red, green, blue axes).</p>
+        </div>
         <p>Where:</p>
         <ul>
             <li><strong>R₁, G₁, B₁</strong> = your reference color's red, green, blue values</li>
@@ -57,7 +61,7 @@
         <p>All yarns are sorted by this distance score from smallest to largest. <strong>Lower scores = better matches</strong> because a distance of 0 means the colors are identical, and larger numbers mean the colors are increasingly different.</p>
 
         <h3 class="h6 mt-4 mb-2">The Big Picture</h3>
-        <p>In essence: the algorithm treats colors as points in a 3D cube where each axis is a color channel (red, green, blue), then finds the yarns whose color points are nearest to your reference color point. No guessing, no squinting—just math.</p>
+        <p>In essence: the algorithm treats colors as points in a 3D cube where each axis is a color channel (red, green, blue), then finds the yarns whose color points are nearest to your reference color point. No guessing, no squinting, just maths.</p>
     </div>
 </div>
 {% endblock %}
