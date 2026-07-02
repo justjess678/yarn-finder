@@ -165,6 +165,10 @@ def brands(request):
     })
 
 
+def how_to_pick_colours(request):
+    return render(request, "yarns/how_to_pick_colours.html")
+
+
 def robots_txt(request):
     from django.http import HttpResponse
     content = "User-agent: *\nDisallow: /admin/\nDisallow: /accounts/\n"
