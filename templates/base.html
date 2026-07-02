@@ -29,14 +29,14 @@
                 <img src="{% static 'images/yarnpalette.png' %}" alt="Logo" height="36"> YarnPalette
             </a>
             <div class="d-flex align-items-center gap-3">
+                <a href="{% url 'about' %}" class="nav-link text-white small">About</a>
+                <a href="{% url 'brands' %}" class="nav-link text-white small">Brands</a>
                 <div class="dropdown">
                     <button class="btn btn-sm nav-link text-white" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Learn
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark">
-                        <li><a class="dropdown-item" href="{% url 'about' %}">About</a></li>
                         <li><a class="dropdown-item" href="{% url 'how_it_works' %}">How It Works</a></li>
-                        <li><a class="dropdown-item" href="{% url 'brands' %}">Brands</a></li>
                         <li><a class="dropdown-item" href="{% url 'dye_lots' %}">Dye Lots</a></li>
                     </ul>
                 </div>
