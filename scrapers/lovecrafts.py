@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 class LoveCraftsScraper(BaseScraper):
     source_id    = "lovecrafts"
     display_name = "LoveCrafts"
-    site_url     = "https://www.lovecrafts.com/"
+    site_url     = "https://www.lovecrafts.com/?a_aid=81052868"
     BASE_URL     = "https://www.lovecrafts.com/en-gb/l/yarns?page={}"
 
     def scrape(self):
@@ -119,7 +119,7 @@ class LoveCraftsScraper(BaseScraper):
             colour_slug = color_el.text.lower().replace(" ", "-").replace("/", "-")
             return {
                 "name": name,
-                "url": f"{url}#color-{colour_slug}",
+                "url": f"{url}?utm_medium=affiliate&a_aid=81052868#color-{colour_slug}",
                 "image_url": image_url,
                 "fiber": fiber,
                 "yarn_type": yarn_type

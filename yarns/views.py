@@ -159,6 +159,12 @@ def dye_lots(request):
     return render(request, "yarns/dye_lots.html")
 
 
+def brands(request):
+    return render(request, "yarns/brands.html", {
+        "sources": [cls for cls in SCRAPERS.values() if cls.display_name],
+    })
+
+
 def robots_txt(request):
     from django.http import HttpResponse
     content = "User-agent: *\nDisallow: /admin/\nDisallow: /accounts/\n"
