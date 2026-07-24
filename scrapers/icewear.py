@@ -14,9 +14,6 @@ class IcewearScraper(BaseScraper):
 
     def scrape(self):
         driver = self._make_driver()
-        driver.execute_script(
-            "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
-        )
         try:
             page_count = 1
             links = self._get_yarn_links(driver, page_count)
