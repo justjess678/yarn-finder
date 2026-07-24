@@ -40,8 +40,6 @@ class LoveCraftsScraper(BaseScraper):
         return math.ceil(total / per_page)
 
     def _get_yarn_links(self, driver, page_count: int) -> list[str]:
-        driver.quit()
-        driver = self._make_driver()
         seen = set()
         links = []
         for i in range(1, page_count + 1):
