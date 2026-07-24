@@ -16,14 +16,14 @@ class YarnType(models.TextChoices):
 
 class Yarn(models.Model):
     name = models.CharField(max_length=1000)
-    url = models.URLField(unique=True)
-    image_url = models.URLField()
-    source = models.CharField(max_length=50)
+    url = models.URLField(unique=True, max_length=1000)
+    image_url = models.URLField(max_length=1000)
+    source = models.CharField(max_length=1000)
     color_r = models.PositiveSmallIntegerField(null=True)
     color_g = models.PositiveSmallIntegerField(null=True)
     color_b = models.PositiveSmallIntegerField(null=True)
-    fiber = models.CharField(max_length=255, blank=True, default="")
-    yarn_type = models.CharField(max_length=100, blank=True, default="")
+    fiber = models.CharField(max_length=1000, blank=True, default="")
+    yarn_type = models.CharField(max_length=1000, blank=True, default="")
     last_scraped = models.DateTimeField(auto_now=True)
 
     @property
