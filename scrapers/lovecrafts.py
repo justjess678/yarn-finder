@@ -40,10 +40,18 @@ class LoveCraftsScraper(BaseScraper):
         return math.ceil(total / per_page)
 
     def _get_yarn_links(self, driver, page_count: int) -> list[str]:
+        driver.quit()
+        driver = self._make_driver()
         seen = set()
         links = []
         for i in range(1, page_count + 1):
-            driver.get(self.BASE_URL.format(i))
+            try:
+                driver.get(self.BASE_URL.format(i))
+            except Exception as e:
+                print(f"FAILED loading page {i}: {type(e).__name__}: {e}")
+                print("Title:", driver.title)
+                print("URL:", driver.current_url)
+                raise
             print(f"Scanning page {i}/{page_count}")
             try:
                 ul = WebDriverWait(driver, 10).until(
