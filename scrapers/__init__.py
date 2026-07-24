@@ -10,7 +10,7 @@ SCRAPERS: dict[str, type] = {
     IceYarnsScraper.source_id: IceYarnsScraper,
     LoveCraftsScraper.source_id: LoveCraftsScraper,
     HobbiiScraper.source_id: HobbiiScraper,
-    #IcewearScraper.source_id: IcewearScraper,
+    IcewearScraper.source_id: IcewearScraper,
     IstexScraper.source_id: IstexScraper,
     YarnspirationsScraper.source_id: YarnspirationsScraper,
     SandnesScraper.source_id: SandnesScraper,
