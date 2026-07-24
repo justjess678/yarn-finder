@@ -29,7 +29,11 @@ class LoveCraftsScraper(BaseScraper):
 
     def _get_page_count(self, driver) -> int:
         print("Getting page count...")
+        print(f"ABOUT TO LOAD PAGE {1}: {self.BASE_URL.format(1)}")
+
         driver.get(self.BASE_URL.format(1))
+
+        print(f"LOADED PAGE {1}: {driver.title}")
         self._accept_cookies(driver)
         counter = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, "navbar__counter__label"))
@@ -44,7 +48,11 @@ class LoveCraftsScraper(BaseScraper):
         links = []
         for i in range(1, page_count + 1):
             try:
+                print(f"ABOUT TO LOAD PAGE {i}: {self.BASE_URL.format(i)}")
+
                 driver.get(self.BASE_URL.format(i))
+
+                print(f"LOADED PAGE {i}: {driver.title}")
             except Exception as e:
                 print(f"FAILED loading page {i}: {type(e).__name__}: {e}")
                 print("Title:", driver.title)
@@ -76,7 +84,11 @@ class LoveCraftsScraper(BaseScraper):
             url = links[idx]
             print("Checking yarn link: {}".format(url))
             try:
+                print(f"ABOUT TO LOAD PAGE {url}")
+
                 driver.get(url)
+
+                print(f"LOADED PAGE: {driver.title}")
             except Exception as e:
                 if "tab crashed" in str(e).lower():
                     print(f"Tab crashed on {url}, restarting driver and retrying...")
