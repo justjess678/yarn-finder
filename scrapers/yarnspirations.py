@@ -16,7 +16,8 @@ def affiliate_link(url, sku):
 class YarnspirationsScraper(BaseScraper):
     source_id    = "yarnspirations"
     display_name = "Yarnspirations"
-    site_url     = "https://www.yarnspirations.com/"
+    _site_url    = "https://www.yarnspirations.com/"
+    site_url     = "https://www.tkqlhce.com/click-101816609-13781249"
     _PRODUCTS_URL = "https://www.yarnspirations.com/collections/yarn/products.json"
 
     def scrape(self):

@@ -15,7 +15,7 @@ class YarnType(models.TextChoices):
 
 
 class Yarn(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=1000)
     url = models.URLField(unique=True)
     image_url = models.URLField()
     source = models.CharField(max_length=50)
