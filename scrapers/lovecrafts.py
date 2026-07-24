@@ -14,12 +14,10 @@ class LoveCraftsScraper(BaseScraper):
 
     def scrape(self):
         driver = self._make_driver()
-        driver.set_page_load_timeout(30)
         try:
             page_count = self._get_page_count(driver)
             print("Found {} pages".format(page_count))
             driver.quit()
-
             driver = self._make_driver()
             links = self._get_yarn_links(driver, page_count)
             print("Found {} yarn links".format(len(links)))
@@ -32,11 +30,7 @@ class LoveCraftsScraper(BaseScraper):
 
     def _get_page_count(self, driver) -> int:
         print("Getting page count...")
-        print(f"ABOUT TO LOAD PAGE {1}: {self.BASE_URL.format(1)}")
-
         driver.get(self.BASE_URL.format(1))
-
-        print(f"LOADED PAGE {1}: {driver.title}")
         self._accept_cookies(driver)
         counter = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, "navbar__counter__label"))
@@ -49,79 +43,134 @@ class LoveCraftsScraper(BaseScraper):
     def _get_yarn_links(self, driver, page_count: int) -> list[str]:
         seen = set()
         links = []
-        for i in range(1, page_count + 1):
-            try:
-                print(f"ABOUT TO LOAD PAGE {i}: {self.BASE_URL.format(i)}")
 
-                driver.get(self.BASE_URL.format(i))
-
-                print(f"LOADED PAGE {i}: {driver.title}")
-            except Exception as e:
-                print(f"FAILED loading page {i}: {type(e).__name__}: {e}")
-                print("Title:", driver.title)
-                print("URL:", driver.current_url)
-                raise
+        i = 1
+        while i <= page_count:
+            url = self.BASE_URL.format(i)
             print(f"Scanning page {i}/{page_count}")
+
             try:
+                driver.get(url)
+
                 ul = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.CLASS_NAME, "products__grid"))
+                    EC.presence_of_element_located(
+                        (By.CLASS_NAME, "products__grid")
+                    )
                 )
+
                 for a in ul.find_elements(By.XPATH, ".//li//div//a"):
                     href = a.get_attribute("href")
                     if href and href not in seen:
                         seen.add(href)
                         links.append(href)
+
+                # Success - move on to the next page
+                i += 1
+
             except Exception as e:
-                print(f"Page {i} error: {e}")
-        print(links)
-        return links
+                msg = str(e).lower()
 
-    def _get_yarn_details(self, driver, links: list[str]):
-        from selenium.common.exceptions import WebDriverException
-        idx = 0
-        while idx < len(links):
-            if idx % 10 == 0 and idx > 0:
-                driver.quit()
-                driver = self._make_driver()
-                driver.set_page_load_timeout(30)
-            url = links[idx]
-            print("Checking yarn link: {}".format(url))
-            try:
-                print(f"ABOUT TO LOAD PAGE {url}")
+                if (
+                        "tab crashed" in msg
+                        or "connection refused" in msg
+                        or "max retries exceeded" in msg
+                        or "failed to establish a new connection" in msg
+                ):
+                    print(f"Driver crashed on page {i}, restarting and retrying...")
 
-                driver.get(url)
-
-                print(f"LOADED PAGE: {driver.title}")
-            except Exception as e:
-                if "tab crashed" in str(e).lower():
-                    print(f"Tab crashed on {url}, restarting driver and retrying...")
                     try:
                         driver.quit()
                     except Exception:
                         pass
+
                     driver = self._make_driver()
-                    continue  # retry same url
+
+                    # Retry the SAME page
+                    continue
+
+                print(f"Skipping page {i}: {e}")
+
+                # Non-fatal error, move to the next page
+                i += 1
+
+        print(links)
+        return links
+
+    def _get_yarn_details(self, driver, links: list[str]):
+        idx = 0
+
+        while idx < len(links):
+            url = links[idx]
+            print(f"Checking yarn link: {url}")
+
+            try:
+                driver.get(url)
+
+            except Exception as e:
+                msg = str(e).lower()
+
+                if (
+                        "tab crashed" in msg
+                        or "connection refused" in msg
+                        or "max retries exceeded" in msg
+                        or "failed to establish a new connection" in msg
+                ):
+                    print(f"Driver crashed on {url}, restarting and retrying...")
+
+                    try:
+                        driver.quit()
+                    except Exception:
+                        pass
+
+                    driver = self._make_driver()
+
+                    # Retry the SAME URL
+                    continue
+
                 print(f"Skipping {url}: {e}")
                 idx += 1
                 continue
+
             try:
-                WebDriverWait(driver, 30).until(
-                    EC.presence_of_element_located((By.CLASS_NAME, "variant-name"))
+                WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located(
+                        (By.CLASS_NAME, "variant-name")
+                    )
                 )
+
                 base_name = driver.find_element(
-                    By.XPATH, "//h1[contains(@class,'sf-heading__title')]"
+                    By.XPATH,
+                    "//h1[contains(@class,'sf-heading__title')]"
                 ).text
+
                 print(base_name)
-                variants = driver.find_elements(By.CLASS_NAME, "grid-variants__variant")
+
+                variants = driver.find_elements(
+                    By.CLASS_NAME,
+                    "grid-variants__variant"
+                )
+
                 seen_colours = set()
+
                 for variant in [None] + list(variants):
-                    result = self._scrape_colour(driver, url, base_name, variant, variants)
+                    result = self._scrape_colour(
+                        driver,
+                        url,
+                        base_name,
+                        variant,
+                        variants,
+                    )
+
                     if result and result["name"] not in seen_colours:
                         seen_colours.add(result["name"])
                         yield result
+
+                # Success - move to the next yarn
+                idx += 1
+
             except Exception as e:
                 print(f"Detail error for {url}: {e}")
-            idx += 1
+                idx += 1
 
     @staticmethod
     def _scrape_colour(driver, url, base_name, variant, all_variants):
