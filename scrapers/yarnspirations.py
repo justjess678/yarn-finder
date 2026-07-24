@@ -1,6 +1,16 @@
 import requests
+from urllib.parse import quote
 
 from .base import BaseScraper
+
+CJ_BASE = "https://www.anrdoezrs.net/click-101816610-13759646"
+
+def affiliate_link(url, sku):
+    return (
+        f"{CJ_BASE}"
+        f"?url={quote(url, safe='')}"
+        f"&cjsku={sku}"
+    )
 
 
 class YarnspirationsScraper(BaseScraper):
@@ -49,9 +59,11 @@ class YarnspirationsScraper(BaseScraper):
             )
             name = f"{base_name}: {colour_label}"
             print(f"  {name}")
+            url = f"https://www.yarnspirations.com/products/{product['handle']}?variant={variant['id']}"
+            aff_url = affiliate_link(url=url, sku=variant["sku"])
             yield {
                 "name": name,
-                "url": f"https://www.yarnspirations.com/products/{product['handle']}?variant={variant['id']}",
+                "url": aff_url,
                 "image_url": image_url,
                 "fiber": "",
                 "yarn_type": product.get("product_type", ""),
