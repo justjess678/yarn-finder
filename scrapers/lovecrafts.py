@@ -18,6 +18,9 @@ class LoveCraftsScraper(BaseScraper):
         try:
             page_count = self._get_page_count(driver)
             print("Found {} pages".format(page_count))
+            driver.quit()
+
+            driver = self._make_driver()
             links = self._get_yarn_links(driver, page_count)
             print("Found {} yarn links".format(len(links)))
             yield from self._get_yarn_details(driver, links)
