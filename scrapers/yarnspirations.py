@@ -44,7 +44,7 @@ class YarnspirationsScraper(BaseScraper):
     source_id    = "yarnspirations"
     display_name = "Yarnspirations"
     _site_url    = "https://www.yarnspirations.com/"
-    site_url     = "https://www.tkqlhce.com/click-101816609-13781249"
+    site_url     = "https://www.yarnspirations.com/?cjdata=MXxZfDB8WXww&utm_source=cj&utm_medium=affiliate&utm_campaign=101816609&AID=13781249&PID=101816609&SID=&CJEVENT=1ab80d4f877a11f182f300920a18b8fa"
     _PRODUCTS_URL = "https://www.yarnspirations.com/collections/yarn/products.json"
 
     def scrape(self):

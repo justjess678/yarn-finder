@@ -29,9 +29,15 @@ class IcewearScraper(BaseScraper):
         seen = set()
         links = []
         driver.get(self.BASE_URL)
+        WebDriverWait(driver, 30).until(
+            lambda d: d.execute_script("return document.readyState") == "complete"
+        )
         print("Scanning page")
         try:
-            ul = WebDriverWait(driver, 10).until(
+            print(driver.current_url)
+            print(driver.title)
+            print(driver.page_source[:500])
+            ul = WebDriverWait(driver, 30).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, ".grid.gap-4.grid-cols-2"))
             )
             for a in ul.find_elements(By.XPATH, ".//div//div//div//a"):
@@ -40,7 +46,9 @@ class IcewearScraper(BaseScraper):
                     seen.add(href)
                     links.append(href)
         except Exception as e:
-            print(f"Page error: {e}")
+            import traceback
+            print(f"Page error: {type(e).__name__}: {repr(e)}")
+            traceback.print_exc()
         print(links)
         return links
 

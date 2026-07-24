@@ -14,6 +14,7 @@ class LoveCraftsScraper(BaseScraper):
 
     def scrape(self):
         driver = self._make_driver()
+        driver.set_page_load_timeout(30)
         try:
             page_count = self._get_page_count(driver)
             print("Found {} pages".format(page_count))
@@ -62,6 +63,10 @@ class LoveCraftsScraper(BaseScraper):
         from selenium.common.exceptions import WebDriverException
         idx = 0
         while idx < len(links):
+            if idx % 10 == 0 and idx > 0:
+                driver.quit()
+                driver = self._make_driver()
+                driver.set_page_load_timeout(30)
             url = links[idx]
             print("Checking yarn link: {}".format(url))
             try:
@@ -79,7 +84,7 @@ class LoveCraftsScraper(BaseScraper):
                 idx += 1
                 continue
             try:
-                WebDriverWait(driver, 10).until(
+                WebDriverWait(driver, 30).until(
                     EC.presence_of_element_located((By.CLASS_NAME, "variant-name"))
                 )
                 base_name = driver.find_element(
@@ -114,8 +119,8 @@ class LoveCraftsScraper(BaseScraper):
                     By.XPATH, ".//span[@data-testid='image-wrapper']//img"
                 ).get_attribute("src")
 
-            fiber = driver.find_element(By.XPATH, '//*[@data-testid="Blend"]//dd').text()
-            yarn_type = driver.find_element(By.XPATH, '//*[@data-testid="Yarn Weight"]//dd').text()
+            fiber = driver.find_element(By.XPATH, '//*[@data-testid="Blend"]//dd').text
+            yarn_type = driver.find_element(By.XPATH, '//*[@data-testid="Yarn Weight"]//dd').text
             colour_slug = color_el.text.lower().replace(" ", "-").replace("/", "-")
             return {
                 "name": name,
