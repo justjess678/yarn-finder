@@ -13,6 +13,33 @@ def affiliate_link(url, sku):
     )
 
 
+def trim_string_with_suffix(text, max_len=200):
+    # If the string is already short enough, return it as is
+    if len(text) <= max_len:
+        return text
+
+    # Split the string at the first colon
+    if ":" in text:
+        prefix, suffix = text.split(":", 1)
+        suffix = ":" + suffix  # Keep the colon as part of the preserved end
+    else:
+        prefix = text
+        suffix = ""
+
+    # Calculate how many characters are allowed for the prefix
+    # Account for the 3 characters used by "..."
+    allowed_prefix_len = max_len - len(suffix) - len("...")
+
+    # Fallback if the suffix + "..." is already longer than max_len
+    if allowed_prefix_len < 0:
+        return text[:max_len - 3] + "..."
+
+    # Trim the prefix from the end working backwards
+    trimmed_prefix = prefix[:allowed_prefix_len]
+
+    return trimmed_prefix + "..." + suffix
+
+
 class YarnspirationsScraper(BaseScraper):
     source_id    = "yarnspirations"
     display_name = "Yarnspirations"
@@ -63,7 +90,7 @@ class YarnspirationsScraper(BaseScraper):
             url = f"https://www.yarnspirations.com/products/{product['handle']}?variant={variant['id']}"
             aff_url = affiliate_link(url=url, sku=variant["sku"])
             yield {
-                "name": name,
+                "name": trim_string_with_suffix(name),
                 "url": aff_url,
                 "image_url": image_url,
                 "fiber": "",
