@@ -33,6 +33,16 @@ python manage.py scrape_yarns --source ice_yarns
 
 Scraping uses Selenium + Chromedriver (`lib/chromedriver-linux64/chromedriver`). It can take a while depending on how many pages the site has.
 
+### Normalizing yarn types
+
+Yarn type/weight data from scrapers is automatically normalized to standard categories (lace, fingering, sport, dk, worsted, aran, bulky, super bulky, jumbo) so the filter works reliably.
+
+To normalize existing yarn types that were scraped before this feature:
+
+```bash
+python manage.py normalize_yarn_types
+```
+
 ### Deleting yarn entries
 
 To remove all yarn entries from a specific source:
@@ -116,9 +126,10 @@ yarn_finder/      Django project settings
 yarns/            Main app - Yarn model, views, URLs, admin
   management/
     commands/
-      scrape_yarns.py     Populate DB from scrapers
-      delete_yarns.py     Delete entries by source
-      seed_test_yarns.py  Dev seed data
+      scrape_yarns.py           Populate DB from scrapers
+      delete_yarns.py           Delete entries by source
+      normalize_yarn_types.py   Normalize yarn weights to standard categories
+      seed_test_yarns.py        Dev seed data
 scrapers/         One file per yarn brand
   base.py         BaseScraper ABC
   ice_yarns.py    Ice Yarns implementation

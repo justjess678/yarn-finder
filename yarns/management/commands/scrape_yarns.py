@@ -3,6 +3,7 @@ import gc
 from django.core.management.base import BaseCommand
 
 from color.selector import ColorSelector
+from color.yarn_utils import normalize_yarn_type
 from scrapers import SCRAPERS
 from yarns.models import Yarn
 
@@ -57,7 +58,7 @@ class Command(BaseCommand):
                             "color_g": color[1] if color else None,
                             "color_b": color[2] if color else None,
                             "fiber": data.get("fiber", ""),
-                            "yarn_type": data.get("yarn_type", ""),
+                            "yarn_type": normalize_yarn_type(data.get("yarn_type", "")),
                         },
                     )
                     count += 1
