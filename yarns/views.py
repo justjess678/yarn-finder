@@ -16,11 +16,18 @@ _selector = ColorSelector()
 def index(request):
     tmp = [cls for cls in SCRAPERS.values() if cls.display_name]
     sources = sorted(tmp, key=lambda cls: cls.display_name)
-    return render(request, "yarns/index.html", {
+
+    context = {
         "yarn_count": Yarn.objects.count(),
         "sources": sources,
         "yarn_types": YarnType.choices,
-    })
+    }
+
+    if request.GET.get("edit") and (ref_color := request.session.get("reference_color")):
+        context["reference_color"] = ref_color
+        context["filters"] = request.session.get("filters", {})
+
+    return render(request, "yarns/index.html", context)
 
 
 def _hex_to_rgb(hex_color: str) -> tuple | None:

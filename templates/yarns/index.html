@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load custom_filters %}
 
 {% block title %}Yarnpalette: Find Your Color{% endblock %}
 
@@ -37,7 +38,7 @@
             </ul>
 
             <div class="tab-content mb-3">
-                <div class="tab-pane fade show active" id="tab-image" role="tabpanel">
+                <div class="tab-pane fade {% if not reference_color %}show active{% endif %}" id="tab-image" role="tabpanel">
                     <input class="form-control" type="file" id="reference_image"
                            name="reference_image" accept="image/*">
                     <div class="form-text">The dominant non-white color will be extracted and matched.</div>
@@ -56,14 +57,26 @@
                     <input type="hidden" name="color_hex" id="color_hex" value="">
                 </div>
 
-                <div class="tab-pane fade" id="tab-color" role="tabpanel">
-                    <div class="d-flex align-items-center gap-3">
-                        <input type="color" class="form-control form-control-color"
-                               id="color_picker" value="#3d7ab5" style="width:60px; height:42px;">
-                        <input type="text" class="form-control font-monospace"
-                               id="color_hex_display" value="#3d7ab5"
-                               maxlength="7" placeholder="#rrggbb" style="width:110px;">
-                    </div>
+                <div class="tab-pane fade {% if reference_color %}show active{% endif %}" id="tab-color" role="tabpanel">
+                    {% if reference_color %}
+                        {% with hex_color=reference_color|css_rgb_to_hex %}
+                        <div class="d-flex align-items-center gap-3">
+                            <input type="color" class="form-control form-control-color"
+                                   id="color_picker" value="{{ hex_color }}" style="width:60px; height:42px;">
+                            <input type="text" class="form-control font-monospace"
+                                   id="color_hex_display" value="{{ hex_color }}"
+                                   maxlength="7" placeholder="#rrggbb" style="width:110px;">
+                        </div>
+                        {% endwith %}
+                    {% else %}
+                        <div class="d-flex align-items-center gap-3">
+                            <input type="color" class="form-control form-control-color"
+                                   id="color_picker" value="#3d7ab5" style="width:60px; height:42px;">
+                            <input type="text" class="form-control font-monospace"
+                                   id="color_hex_display" value="#3d7ab5"
+                                   maxlength="7" placeholder="#rrggbb" style="width:110px;">
+                        </div>
+                    {% endif %}
                     <div class="form-text">Type a hex value or use the colour picker.</div>
                 </div>
             </div>
@@ -79,7 +92,8 @@
                         {% for s in sources %}
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="checkbox" name="brands"
-                                   id="brand_{{ s.source_id }}" value="{{ s.source_id }}" checked>
+                                   id="brand_{{ s.source_id }}" value="{{ s.source_id }}"
+                                   {% if not filters.brands or s.source_id in filters.brands %}checked{% endif %}>
                             <label class="form-check-label small" for="brand_{{ s.source_id }}">{{ s.display_name }}</label>
                         </div>
                         {% endfor %}
@@ -88,14 +102,14 @@
                     <div>
                         <label for="fiber" class="form-label small">Fiber contains</label>
                         <input type="text" class="form-control form-control-sm" id="fiber" name="fiber"
-                               placeholder="e.g. wool, cotton, acrylic">
+                               placeholder="e.g. wool, cotton, acrylic" value="{{ filters.fiber }}">
                     </div>
                     <div>
                         <label for="yarn_type" class="form-label small">Yarn type</label>
                         <select class="form-select form-select-sm" id="yarn_type" name="yarn_type">
                             <option value="">— any —</option>
                             {% for value, label in yarn_types %}
-                            <option value="{{ value }}">{{ label }}</option>
+                            <option value="{{ value }}" {% if filters.yarn_type == value %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -166,6 +180,11 @@
             hidden.value = val;
         }
     });
+
+    // --- pre-fill hidden field when editing search ---
+    if (picker.value && picker.value !== '#3d7ab5') {
+        hidden.value = picker.value;
+    }
 
     // --- pick from image tab ---
     const pickFile    = document.getElementById('pick_image_file');

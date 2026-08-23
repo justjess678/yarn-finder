@@ -9,7 +9,10 @@
         <h1 class="h4 mb-0">Closest matches</h1>
         <small class="text-muted">{{ total_count }} yarn{{ total_count|pluralize }} compared &mdash; showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</small>
     </div>
-    <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-sm ms-auto">New search</a>
+    <div class="ms-auto d-flex gap-2">
+        <a href="{% url 'index' %}?edit=1" class="btn btn-outline-dark btn-sm">Edit search</a>
+        <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-sm">New search</a>
+    </div>
 </div>
 
 {% if filters %}
