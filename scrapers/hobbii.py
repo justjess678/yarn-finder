@@ -7,7 +7,7 @@ from .base import BaseScraper
 class HobbiiScraper(BaseScraper):
     source_id    = "hobbii"
     display_name = "Hobbii"
-    site_url     = "https://www.hobbii.com/"
+    site_url     = "https://www.hobbii.com/?dt_id=3379112%3Bap%3A2291652&utm_medium=shopify_collabs&utm_source=affiliate"
     _PRODUCTS_URL = "https://hobbii.com/collections/yarn/products.json"
 
     def scrape(self):
