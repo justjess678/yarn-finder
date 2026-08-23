@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load custom_filters %}
 
 {% block title %}Yarnpalette: Find Your Color{% endblock %}
 
@@ -57,17 +56,15 @@
                     <input type="hidden" name="color_hex" id="color_hex" value="">
                 </div>
 
-                <div class="tab-pane fade {% if reference_color %}show active{% endif %}" id="tab-color" role="tabpanel">
-                    {% if reference_color %}
-                        {% with hex_color=reference_color|css_rgb_to_hex %}
+                <div class="tab-pane fade {% if reference_color_hex %}show active{% endif %}" id="tab-color" role="tabpanel">
+                    {% if reference_color_hex %}
                         <div class="d-flex align-items-center gap-3">
                             <input type="color" class="form-control form-control-color"
-                                   id="color_picker" value="{{ hex_color }}" style="width:60px; height:42px;">
+                                   id="color_picker" value="{{ reference_color_hex }}" style="width:60px; height:42px;">
                             <input type="text" class="form-control font-monospace"
-                                   id="color_hex_display" value="{{ hex_color }}"
+                                   id="color_hex_display" value="{{ reference_color_hex }}"
                                    maxlength="7" placeholder="#rrggbb" style="width:110px;">
                         </div>
-                        {% endwith %}
                     {% else %}
                         <div class="d-flex align-items-center gap-3">
                             <input type="color" class="form-control form-control-color"

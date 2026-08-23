@@ -43,6 +43,14 @@ To normalize existing yarn types that were scraped before this feature:
 python manage.py normalize_yarn_types
 ```
 
+### Refreshing a brand
+
+To delete and re-scrape all entries from a brand in one command:
+
+```bash
+python manage.py refresh_brand --source hobbii
+```
+
 ### Deleting yarn entries
 
 To remove all yarn entries from a specific source:
@@ -127,6 +135,7 @@ yarns/            Main app - Yarn model, views, URLs, admin
   management/
     commands/
       scrape_yarns.py           Populate DB from scrapers
+      refresh_brand.py          Delete and re-scrape a brand
       delete_yarns.py           Delete entries by source
       normalize_yarn_types.py   Normalize yarn weights to standard categories
       seed_test_yarns.py        Dev seed data

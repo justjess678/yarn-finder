@@ -24,7 +24,9 @@ def index(request):
     }
 
     if request.GET.get("edit") and (ref_color := request.session.get("reference_color")):
-        context["reference_color"] = ref_color
+        r, g, b = ref_color
+        context["reference_color_rgb"] = ref_color
+        context["reference_color_hex"] = f"#{r:02x}{g:02x}{b:02x}"
         context["filters"] = request.session.get("filters", {})
 
     return render(request, "yarns/index.html", context)
