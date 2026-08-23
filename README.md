@@ -47,6 +47,70 @@ python manage.py scrape_yarns
 python manage.py scrape_yarns --source ice_yarns
 ```
 
+### Syncing data between local and production
+
+To copy yarn data from your local database to production, replacing all existing entries for that brand:
+
+#### Step 1: Export from local
+
+On your local machine, export the brand data to a JSON file:
+
+```bash
+python manage.py export_brand --source hobbii --output hobbii.json
+```
+
+This creates a `hobbii.json` file containing all hobbii yarns with their colors, fiber info, and yarn types.
+
+#### Step 2: Transfer to production
+
+You can transfer the JSON file in a few ways:
+
+**Option A: Via git (recommended)**
+```bash
+git add hobbii.json
+git commit -m "Add hobbii data export"
+git push origin webapp
+```
+
+Then redeploy on Render, and the file will be available.
+
+**Option B: Via Render shell upload**
+Use the Render dashboard's file upload feature or copy/paste the JSON content.
+
+**Option C: Email/messaging**
+Copy the file content and paste it into the Render shell.
+
+#### Step 3: Import on production
+
+In the Render shell, run:
+
+```bash
+python manage.py import_brand --source hobbii --file hobbii.json
+```
+
+This will:
+1. Delete all existing hobbii entries in production
+2. Import all entries from the JSON file
+3. Report how many yarns were imported
+
+The import includes all data: URLs, images, colors, fiber content, and yarn types.
+
+#### Example workflow
+
+```bash
+# Local: Export hobbii data
+python manage.py export_brand --source hobbii
+
+# Commit and push
+git add hobbii.json
+git commit -m "Export hobbii data for sync"
+git push origin webapp
+
+# On Render: Pull and import
+git pull origin webapp
+python manage.py import_brand --source hobbii --file hobbii.json
+```
+
 ### Advanced: Delete entries (without re-scraping)
 
 To remove all yarn entries from a specific source without re-scraping:
@@ -142,6 +206,8 @@ yarns/            Main app - Yarn model, views, URLs, admin
     commands/
       scrape_yarns.py           Populate DB from scrapers
       refresh_brand.py          Delete and re-scrape a brand
+      export_brand.py           Export brand data to JSON
+      import_brand.py           Import brand data from JSON (replaces existing)
       delete_yarns.py           Delete entries by source
       normalize_yarn_types.py   Normalize yarn weights to standard categories
       seed_test_yarns.py        Dev seed data
