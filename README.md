@@ -33,6 +33,18 @@ python manage.py scrape_yarns --source ice_yarns
 
 Scraping uses Selenium + Chromedriver (`lib/chromedriver-linux64/chromedriver`). It can take a while depending on how many pages the site has.
 
+### Deleting yarn entries
+
+To remove all yarn entries from a specific source:
+
+```bash
+# Delete with confirmation prompt
+python manage.py delete_yarns --source hobbii
+
+# Skip confirmation (for scripts/automation)
+python manage.py delete_yarns --source hobbii --confirm
+```
+
 ### Seeding test data (dev only)
 
 If you can't run the real scraper (e.g. the site has changed), seed 22 placeholder yarns spanning the colour spectrum:
@@ -105,6 +117,7 @@ yarns/            Main app — Yarn model, views, URLs, admin
   management/
     commands/
       scrape_yarns.py     Populate DB from scrapers
+      delete_yarns.py     Delete entries by source
       seed_test_yarns.py  Dev seed data
 scrapers/         One file per yarn brand
   base.py         BaseScraper ABC
