@@ -52,7 +52,7 @@ class HobbiiScraper(BaseScraper):
             print(f"  {name}")
             yield {
                 "name": name,
-                "url": f"https://hobbii.com/products/{product['handle']}?variant={variant['id']}",
+                "url": f"https://hobbii.com/products/{product['handle']}?variant={variant['id']}&dt_id=3379112%3Bap%3A2291652&utm_medium=shopify_collabs&utm_source=affiliate",
                 "image_url": image_url,
                 "fiber": "",
                 "yarn_type": product.get("product_type", ""),
