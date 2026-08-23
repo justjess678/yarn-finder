@@ -23,6 +23,22 @@ Then open http://127.0.0.1:8000.
 
 Yarn data is scraped separately and stored in the database. The web search runs against whatever is already in the DB, so scrape first.
 
+Scraping uses Selenium + Chromedriver (`lib/chromedriver-linux64/chromedriver`). It can take a while depending on how many pages the site has.
+
+### Quick start: Refresh a brand
+
+To delete old data and re-scrape a brand in one command (recommended):
+
+```bash
+python manage.py refresh_brand --source hobbii
+```
+
+This deletes all existing entries for that brand and re-scrapes everything fresh. Yarn types are automatically normalized to standard categories in the process.
+
+### Alternative: Scrape without deleting
+
+To add or update yarn data without removing existing entries:
+
 ```bash
 # Scrape all sources
 python manage.py scrape_yarns
@@ -31,29 +47,9 @@ python manage.py scrape_yarns
 python manage.py scrape_yarns --source ice_yarns
 ```
 
-Scraping uses Selenium + Chromedriver (`lib/chromedriver-linux64/chromedriver`). It can take a while depending on how many pages the site has.
+### Advanced: Delete entries (without re-scraping)
 
-### Normalizing yarn types
-
-Yarn type/weight data from scrapers is automatically normalized to standard categories (lace, fingering, sport, dk, worsted, aran, bulky, super bulky, jumbo) so the filter works reliably.
-
-To normalize existing yarn types that were scraped before this feature:
-
-```bash
-python manage.py normalize_yarn_types
-```
-
-### Refreshing a brand
-
-To delete and re-scrape all entries from a brand in one command:
-
-```bash
-python manage.py refresh_brand --source hobbii
-```
-
-### Deleting yarn entries
-
-To remove all yarn entries from a specific source:
+To remove all yarn entries from a specific source without re-scraping:
 
 ```bash
 # Delete with confirmation prompt
@@ -61,6 +57,16 @@ python manage.py delete_yarns --source hobbii
 
 # Skip confirmation (for scripts/automation)
 python manage.py delete_yarns --source hobbii --confirm
+```
+
+### Normalizing yarn types
+
+Yarn type/weight data is automatically normalized to standard categories (lace, fingering, sport, dk, worsted, aran, bulky, super bulky, jumbo) during scraping.
+
+To normalize existing yarn types that were scraped before this feature:
+
+```bash
+python manage.py normalize_yarn_types
 ```
 
 ### Seeding test data (dev only)
