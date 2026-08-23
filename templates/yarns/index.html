@@ -107,7 +107,7 @@
                     <div>
                         <label for="yarn_type" class="form-label small">Yarn type</label>
                         <select class="form-select form-select-sm" id="yarn_type" name="yarn_type">
-                            <option value="">— any —</option>
+                            <option value="">- any -</option>
                             {% for value, label in yarn_types %}
                             <option value="{{ value }}" {% if filters.yarn_type == value %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}

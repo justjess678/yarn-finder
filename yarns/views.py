@@ -80,7 +80,7 @@ def search(request):
 
         if not reference_color:
             return render(request, "yarns/index.html", {
-                "error": "No dominant color found — the image may be entirely white.",
+                "error": "No dominant color found - the image may be entirely white.",
                 "yarn_count": Yarn.objects.count(),
                 "yarn_types": YarnType.choices,
                 "sources": [cls for cls in SCRAPERS.values() if cls.display_name],

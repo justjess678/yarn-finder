@@ -113,7 +113,7 @@ python manage.py createsuperuser
 
 ```
 yarn_finder/      Django project settings
-yarns/            Main app — Yarn model, views, URLs, admin
+yarns/            Main app - Yarn model, views, URLs, admin
   management/
     commands/
       scrape_yarns.py     Populate DB from scrapers

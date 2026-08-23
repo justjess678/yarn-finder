@@ -37,7 +37,7 @@ class LoveCraftsScraper(BaseScraper):
         )
         text = counter.text
         total = int(re.search(r'of (\d+)', text).group(1))
-        per_page = int(re.search(r'\d+[—–-](\d+)', text).group(1))
+        per_page = int(re.search(r'\d+[-–-](\d+)', text).group(1))
         return math.ceil(total / per_page)
 
     def _get_yarn_links(self, driver, page_count: int) -> list[str]:
